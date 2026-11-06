@@ -29,7 +29,7 @@
         <form method="post" action="{{ url('/install/admin') }}" class="stack">
             @csrf
             @if ($confirmDatabasePassword)
-                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="off"></label>
+                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore></label>
             @endif
             <button type="submit">Finish setup</button>
         </form>
@@ -43,7 +43,7 @@
         <form method="post" action="{{ url('/install/admin') }}" class="stack">
             @csrf
             @if ($confirmDatabasePassword)
-                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="off"></label>
+                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore></label>
             @endif
             <label>Name <input name="name" value="{{ old('name') }}" required maxlength="120" autocomplete="name"></label>
             <label>Email <input type="email" name="email" value="{{ old('email') }}" required autocomplete="email"></label>
