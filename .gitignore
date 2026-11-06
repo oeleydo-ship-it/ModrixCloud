@@ -10,3 +10,4 @@
 !/storage/logs/.gitignore
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
+/.phpunit.result.cache
