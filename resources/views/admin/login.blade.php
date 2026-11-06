@@ -10,5 +10,6 @@
             <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
             <button type="submit">Sign in</button>
         </form>
+        <p class="meta"><a href="{{ url('/account/forgot-password') }}">Forgot your password?</a></p>
     </section>
 @endsection

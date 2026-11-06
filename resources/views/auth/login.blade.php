@@ -10,6 +10,7 @@
             <input type="hidden" name="next" value="{{ $next }}">
             <label>Email <input type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus></label>
             <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
+            <p class="meta"><a href="{{ url('/account/forgot-password') }}">Forgot your password?</a></p>
             <label class="check"><input type="checkbox" name="remember" value="1"> Keep me signed in</label>
             <button type="submit">Log in</button>
         </form>

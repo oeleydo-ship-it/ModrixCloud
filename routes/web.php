@@ -11,6 +11,7 @@ use Marketplace\Http\Controllers\Admin\StoreAdminController;
 use Marketplace\Http\Controllers\Admin\SubmissionController;
 use Marketplace\Http\Controllers\Admin\UserAdminController;
 use Marketplace\Http\Controllers\AuthController;
+use Marketplace\Http\Controllers\PasswordResetController;
 use Marketplace\Http\Controllers\CatalogController;
 use Marketplace\Http\Controllers\ConnectController;
 use Marketplace\Http\Controllers\CheckoutController;
@@ -40,6 +41,11 @@ Route::middleware('guest')->group(function () {
     Route::post('account/login', [AuthController::class, 'authenticate'])->middleware('throttle:10,1');
     Route::get('account/register', [AuthController::class, 'register'])->name('register');
     Route::post('account/register', [AuthController::class, 'store'])->middleware('throttle:10,1');
+
+    Route::get('account/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('account/forgot-password', [PasswordResetController::class, 'send'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('account/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('account/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:10,1')->name('password.update');
 });
 Route::post('account/logout', [AuthController::class, 'logout'])->name('logout');
 

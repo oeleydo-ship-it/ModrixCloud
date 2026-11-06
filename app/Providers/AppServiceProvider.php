@@ -13,6 +13,16 @@ class AppServiceProvider extends ServiceProvider
     {
         // Read from the database once per request.
         $this->app->scoped(SigningKey::class);
+
+        // The session cookie is named after APP_NAME. A name with dots or
+        // spaces (a host sets APP_NAME to the domain) is renamed by PHP on
+        // the way in ("a.b_session" arrives as "a_b_session"), so the session
+        // is lost on every request: CSRF fails and nobody can stay signed in.
+        $cookie = (string) config('session.cookie');
+        $safe = preg_replace('/[^A-Za-z0-9_-]+/', '_', $cookie);
+        if ($safe !== $cookie) {
+            config(['session.cookie' => $safe]);
+        }
     }
 
     public function boot(): void
