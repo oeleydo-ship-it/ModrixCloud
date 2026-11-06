@@ -10,6 +10,10 @@ return [
     // Written when setup finishes (web installer or marketplace:install); /install is closed while it exists.
     'installed_file' => storage_path('app/installed'),
 
+    // Recovery: reopens /install on an installed marketplace so the owner can set an
+    // administrator's password again (guarded by the database password). Remove after use.
+    'reopen_installer' => (bool) env('MARKETPLACE_REOPEN_INSTALLER', false),
+
     // Source tree (modules/ and themes/) that `marketplace:publish` packages from.
     'source_root' => env('CATALOG_ROOT') ?: dirname(base_path()),
 

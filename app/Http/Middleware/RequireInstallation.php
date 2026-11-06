@@ -21,7 +21,8 @@ class RequireInstallation
         $installing = $request->is('install', 'install/*');
 
         if ($this->installer->isInstalled()) {
-            abort_if($installing, 404);
+            // Closed for good, unless the owner reopened it from the server's environment.
+            abort_if($installing && ! config('marketplace.reopen_installer'), 404);
 
             return $next($request);
         }

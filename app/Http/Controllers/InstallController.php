@@ -4,6 +4,10 @@ namespace Marketplace\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -28,8 +32,9 @@ class InstallController
         return view('install.show', [
             'step' => $mode === null ? 'database' : 'admin',
             'preconfigured' => $mode === 'preconfigured',
+            'reset' => $mode === 'reset',
             'confirmDatabasePassword' => $this->needsDatabasePassword($mode),
-            'hasAdmin' => $mode !== null && User::query()->where('is_admin', true)->exists(),
+            'hasAdmin' => in_array($mode, ['wizard', 'preconfigured'], true) && User::query()->where('is_admin', true)->exists(),
             'requirements' => [
                 'PHP 8.3 or newer' => version_compare(PHP_VERSION, '8.3.0', '>='),
                 'pdo_mysql extension' => extension_loaded('pdo_mysql'),
@@ -42,6 +47,9 @@ class InstallController
 
     public function database(Request $request): RedirectResponse
     {
+        // A reopened installer only resets admin access; the database stays as it is.
+        abort_if($this->installer->isInstalled(), 404);
+
         $db = $request->validate([
             'host' => ['required', 'string', 'max:255'],
             'port' => ['required', 'integer', 'min:1', 'max:65535'],
@@ -74,6 +82,10 @@ class InstallController
             throw ValidationException::withMessages(['database_password' => 'That is not the database password in this server’s .env.']);
         }
 
+        if ($mode === 'reset') {
+            return $this->resetAdmin($request);
+        }
+
         if (! User::query()->where('is_admin', true)->exists()) {
             $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
             $data = $request->validate([
@@ -100,9 +112,50 @@ class InstallController
         return view('install.done');
     }
 
-    /** 'wizard' after step 1 in this session, 'preconfigured' when .env already has a migrated database, else null. */
+    /**
+     * Reopened installer: sets a new password for the admin with this email
+     * (making the account an unbanned admin), or creates that admin.
+     */
+    private function resetAdmin(Request $request): View
+    {
+        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:191'],
+            'name' => ['nullable', 'string', 'max:120'],
+            'password' => ['required', 'confirmed:password_confirmation', Password::min(12)],
+        ]);
+
+        $user = User::query()->where('email', $data['email'])->first()
+            ?? User::query()->create(['name' => $data['name'] ?: strtok($data['email'], '@'), 'email' => $data['email'], 'password' => $data['password']]);
+
+        $user->forceFill([
+            'password' => $data['password'],
+            'is_admin' => true,
+            'banned_at' => null,
+            'ban_reason' => null,
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        $table = (string) config('session.table', 'sessions');
+        if (config('session.driver') === 'database' && Schema::hasTable($table)) {
+            DB::table($table)->where('user_id', $user->id)->delete();
+        }
+        Log::notice("Admin access for {$user->email} was reset through the reopened installer.");
+
+        return view('install.done', ['reset' => true, 'email' => $user->email]);
+    }
+
+    /**
+     * 'reset' on an installed marketplace reopened from the environment, 'wizard'
+     * after step 1 in this session, 'preconfigured' when .env already has a
+     * migrated database, else null.
+     */
     private function mode(Request $request): ?string
     {
+        if ($this->installer->isInstalled()) {
+            return config('marketplace.reopen_installer') ? 'reset' : null;
+        }
+
         if ($request->session()->get('install.database')) {
             return 'wizard';
         }
@@ -112,6 +165,6 @@ class InstallController
 
     private function needsDatabasePassword(?string $mode): bool
     {
-        return $mode === 'preconfigured' && $this->installer->configuredDatabasePassword() !== '';
+        return in_array($mode, ['preconfigured', 'reset'], true) && $this->installer->configuredDatabasePassword() !== '';
     }
 }

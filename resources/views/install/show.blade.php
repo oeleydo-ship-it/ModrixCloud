@@ -23,6 +23,20 @@
             <label>Database password <input type="password" name="password" maxlength="255" autocomplete="new-password"></label>
             <button type="submit">Test connection and continue</button>
         </form>
+    @elseif ($reset)
+        <h1>Reset admin access</h1>
+        <p class="meta">The installer was reopened with <code>MARKETPLACE_REOPEN_INSTALLER</code>. Enter the administrator's email and a new password. If no account uses that email, a new administrator is created.</p>
+        <form method="post" action="{{ url('/install/admin') }}" class="stack">
+            @csrf
+            @if ($confirmDatabasePassword)
+                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="one-time-code" data-lpignore="true" data-1p-ignore></label>
+            @endif
+            <label>Admin email <input type="email" name="email" value="{{ old('email') }}" required autocomplete="email"></label>
+            <label>Name <span class="meta">(only used for a new account)</span> <input name="name" value="{{ old('name') }}" maxlength="120" autocomplete="name"></label>
+            <label>New password (12+ characters) <input type="password" name="password" required minlength="12" autocomplete="new-password"></label>
+            <label>Confirm new password <input type="password" name="password_confirmation" required minlength="12" autocomplete="new-password"></label>
+            <button type="submit">Save admin access</button>
+        </form>
     @elseif ($hasAdmin)
         <h1>Admin account</h1>
         <p>The database already has an administrator (for example from an import). Finish setup and sign in with that account.</p>
