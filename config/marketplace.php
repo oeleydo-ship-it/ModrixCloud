@@ -14,8 +14,9 @@ return [
     // administrator's password again (guarded by the database password). Remove after use.
     'reopen_installer' => (bool) env('MARKETPLACE_REOPEN_INSTALLER', false),
 
-    // Source tree (modules/ and themes/) that `marketplace:publish` packages from.
-    'source_root' => env('CATALOG_ROOT') ?: dirname(base_path()),
+    // Source tree (modules/ and themes/) that `marketplace:publish` packages from:
+    // the bundled catalog/ folder, else the folder above this app (the platform repository).
+    'source_root' => env('CATALOG_ROOT') ?: (is_dir(base_path('catalog/modules')) ? base_path('catalog') : dirname(base_path())),
 
     // Signed license tokens stay valid this long; stores refresh them on checks.
     'token_days' => 30,

@@ -62,7 +62,11 @@ public key shown under Admin → Settings → Licensing.
 
 **Publishing from the platform repository**:
 `php artisan marketplace:publish vendor/package` zips that module or theme from
-`CATALOG_ROOT` and publishes it as a signed release.
+`CATALOG_ROOT` and publishes it as a signed release. The first-party modules
+and themes are bundled in `catalog/` (the default source when `CATALOG_ROOT` is
+unset); `php artisan db:seed --force` (or `marketplace:publish --all`)
+publishes every one of them, skips versions already released, and applies the
+categories and features in `listings/`.
 
 ## Files and security
 

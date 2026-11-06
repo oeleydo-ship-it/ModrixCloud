@@ -19,7 +19,7 @@ use ZipArchive;
  */
 class PublishPackage extends Command
 {
-    protected $signature = 'marketplace:publish {identifier : vendor/package} {--root= : Source tree with modules/ and themes/ (default CATALOG_ROOT)}';
+    protected $signature = 'marketplace:publish {identifier? : vendor/package} {--all : Publish every module and theme in the source tree, skipping versions already released} {--root= : Source tree with modules/ and themes/ (default CATALOG_ROOT)}';
 
     protected $description = 'Publish a package version from the source tree';
 
@@ -27,15 +27,56 @@ class PublishPackage extends Command
 
     public function handle(Releases $releases): int
     {
+        $root = rtrim((string) ($this->option('root') ?: config('marketplace.source_root')), '/\\');
+
+        if ($this->option('all')) {
+            return $this->publishAll($releases, $root);
+        }
+
         $identifier = (string) $this->argument('identifier');
 
+        return $this->publishOne($releases, $root, $identifier);
+    }
+
+    /** Every modules/vendor/name and themes/vendor/name under the root. */
+    private function publishAll(Releases $releases, string $root): int
+    {
+        $identifiers = [];
+
+        foreach (['module' => 'modules', 'theme' => 'themes'] as $type => $folder) {
+            foreach (glob($root.'/'.$folder.'/*/*/'.$type.'.json') ?: [] as $manifest) {
+                $dir = dirname($manifest);
+                $identifiers[] = basename(dirname($dir)).'/'.basename($dir);
+            }
+        }
+
+        if ($identifiers === []) {
+            $this->error("No modules or themes found under {$root}.");
+
+            return self::FAILURE;
+        }
+
+        $failed = 0;
+
+        foreach (array_unique($identifiers) as $identifier) {
+            if ($this->publishOne($releases, $root, $identifier, skipExisting: true) !== self::SUCCESS) {
+                $failed++;
+            }
+        }
+
+        $this->line(count($identifiers).' packages checked, '.$failed.' failed.');
+
+        return $failed === 0 ? self::SUCCESS : self::FAILURE;
+    }
+
+    private function publishOne(Releases $releases, string $root, string $identifier, bool $skipExisting = false): int
+    {
         if (preg_match('#^[a-z0-9][a-z0-9-]*/[a-z0-9][a-z0-9-]*$#D', $identifier) !== 1) {
             $this->error('Use a vendor/package identifier, for example modrixcommerce/razorpay.');
 
             return self::FAILURE;
         }
 
-        $root = rtrim((string) ($this->option('root') ?: config('marketplace.source_root')), '/\\');
         [$type, $dir] = $this->locate($root, $identifier);
 
         if ($dir === null) {
@@ -54,6 +95,13 @@ class PublishPackage extends Command
         }
 
         $platform = (string) ($manifest['requires']['platform'] ?? $manifest['platform_version'] ?? '^1.0');
+
+        if ($skipExisting && Package::query()->where('identifier', $identifier)->whereHas('releases', fn ($q) => $q->where('version', $version))->exists()) {
+            $this->line("{$identifier} {$version} is already published.");
+
+            return self::SUCCESS;
+        }
+
         $zip = $this->zip($dir);
 
         try {
