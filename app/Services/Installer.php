@@ -5,6 +5,7 @@ namespace Marketplace\Services;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use PDO;
 use PDOException;
 
@@ -116,6 +117,51 @@ class Installer
         }
 
         return $driver;
+    }
+
+    /**
+     * True when .env already points at a MySQL/MariaDB/PostgreSQL database
+     * whose tables exist, e.g. a deploy that ran `php artisan migrate`. The
+     * installer then skips the database step and only creates the admin.
+     */
+    public function preconfiguredDatabase(): bool
+    {
+        $name = (string) config('database.default');
+        $connection = (array) config("database.connections.{$name}", []);
+
+        if (! in_array($connection['driver'] ?? null, ['mysql', 'mariadb', 'pgsql'], true)
+            || trim((string) ($connection['host'] ?? '')) === ''
+            || trim((string) ($connection['database'] ?? '')) === '') {
+            return false;
+        }
+
+        try {
+            $schema = Schema::connection($name);
+
+            return $schema->hasTable('migrations') && $schema->hasTable('users');
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /** The password of the database in .env: proof of server ownership when the database step is skipped. */
+    public function configuredDatabasePassword(): string
+    {
+        return (string) config('database.connections.'.config('database.default').'.password', '');
+    }
+
+    /**
+     * Seeds the defaults (categories) a deploy-time `migrate` does not; safe to run again.
+     *
+     * @throws InstallerException
+     */
+    public function seedDefaults(): void
+    {
+        try {
+            Artisan::call('db:seed', ['--force' => true]);
+        } catch (\Throwable $e) {
+            throw new InstallerException('The default categories could not be created: '.$e->getMessage());
+        }
     }
 
     /** @throws InstallerException */

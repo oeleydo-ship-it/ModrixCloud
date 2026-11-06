@@ -26,12 +26,25 @@
     @elseif ($hasAdmin)
         <h1>Admin account</h1>
         <p>The database already has an administrator (for example from an import). Finish setup and sign in with that account.</p>
-        <form method="post" action="{{ url('/install/admin') }}">@csrf<button type="submit">Finish setup</button></form>
-    @else
-        <h1>Admin account</h1>
-        <p class="meta">The database is ready. Create the administrator who manages the marketplace.</p>
         <form method="post" action="{{ url('/install/admin') }}" class="stack">
             @csrf
+            @if ($confirmDatabasePassword)
+                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="off"></label>
+            @endif
+            <button type="submit">Finish setup</button>
+        </form>
+    @else
+        <h1>Admin account</h1>
+        @if ($preconfigured)
+            <p class="meta">The database from this server's <code>.env</code> is connected and its tables are in place. Create the administrator who manages the marketplace.</p>
+        @else
+            <p class="meta">The database is ready. Create the administrator who manages the marketplace.</p>
+        @endif
+        <form method="post" action="{{ url('/install/admin') }}" class="stack">
+            @csrf
+            @if ($confirmDatabasePassword)
+                <label>Database password <span class="meta">(DB_PASSWORD in this server's .env, to confirm you own it)</span> <input type="password" name="database_password" required maxlength="255" autocomplete="off"></label>
+            @endif
             <label>Name <input name="name" value="{{ old('name') }}" required maxlength="120" autocomplete="name"></label>
             <label>Email <input type="email" name="email" value="{{ old('email') }}" required autocomplete="email"></label>
             <label>Password (12+ characters) <input type="password" name="password" required minlength="12" autocomplete="new-password"></label>

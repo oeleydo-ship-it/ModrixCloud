@@ -164,4 +164,67 @@ class InstallerTest extends TestCase
 
         $this->database()->assertSessionHasErrors(['host' => 'Access denied for user']);
     }
+
+    /** .env already has a migrated database (a deploy ran `php artisan migrate`). */
+    private function preconfigured(string $databasePassword = 'db-secret'): void
+    {
+        $this->app->instance(Installer::class, new class($databasePassword) extends Installer
+        {
+            public function __construct(private string $databasePassword) {}
+
+            public function preconfiguredDatabase(): bool
+            {
+                return true;
+            }
+
+            public function configuredDatabasePassword(): string
+            {
+                return $this->databasePassword;
+            }
+        });
+    }
+
+    private function adminForm(array $overrides = []): array
+    {
+        return ['name' => 'Owner', 'email' => 'owner@example.test', 'password' => 'Long-enough-pass-1', 'password_confirmation' => 'Long-enough-pass-1', 'database_password' => 'db-secret', ...$overrides];
+    }
+
+    public function test_a_migrated_database_from_env_skips_straight_to_the_admin_step()
+    {
+        $this->preconfigured();
+
+        $this->get('/install')->assertOk()->assertSee('Admin account')->assertDontSee('Connect MySQL')->assertSee('database_password', false);
+    }
+
+    public function test_without_a_migrated_database_the_database_step_still_shows()
+    {
+        // The test database is SQLite, which is never treated as preconfigured.
+        $this->assertFalse(app(Installer::class)->preconfiguredDatabase());
+        $this->get('/install')->assertSee('Connect MySQL');
+    }
+
+    public function test_the_admin_step_needs_the_database_password_from_env()
+    {
+        $this->preconfigured();
+
+        $this->post('/install/admin', $this->adminForm(['database_password' => 'guess']))->assertSessionHasErrors('database_password');
+        $this->post('/install/admin', $this->adminForm(['database_password' => '']))->assertSessionHasErrors('database_password');
+        $this->assertSame(0, User::query()->count());
+        $this->assertFileDoesNotExist(config('marketplace.installed_file'));
+
+        $this->post('/install/admin', $this->adminForm())->assertOk()->assertSee('/admin/login');
+        $this->assertTrue(User::query()->where('email', 'owner@example.test')->value('is_admin'));
+        $this->assertFileExists(config('marketplace.installed_file'));
+        // The deploy only migrated; finishing seeds the default categories.
+        $this->assertGreaterThan(0, \Marketplace\Models\Category::query()->count());
+        $this->get('/install')->assertNotFound();
+    }
+
+    public function test_a_database_without_a_password_needs_no_confirmation()
+    {
+        $this->preconfigured('');
+
+        $this->get('/install')->assertDontSee('database_password', false);
+        $this->post('/install/admin', $this->adminForm(['database_password' => null]))->assertOk();
+    }
 }
