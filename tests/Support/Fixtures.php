@@ -55,4 +55,29 @@ trait Fixtures
 
         return new UploadedFile($path, 'package.zip', 'application/zip', null, true);
     }
+
+    /** A core platform release ZIP: artisan, vendor/autoload.php and app/Core/Platform.php declaring the version. */
+    protected function coreZip(string $version, array $extra = []): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'zip').'.zip';
+        $zip = new ZipArchive;
+        $zip->open($path, ZipArchive::CREATE);
+        $zip->addFromString('artisan', '<?php');
+        $zip->addFromString('vendor/autoload.php', '<?php');
+        $zip->addFromString('app/Core/Platform.php', "<?php
+
+class Platform
+{
+    public const VERSION = '{$version}';
+}
+");
+
+        foreach ($extra as $name => $contents) {
+            $zip->addFromString($name, $contents);
+        }
+
+        $zip->close();
+
+        return new UploadedFile($path, 'core.zip', 'application/zip', null, true);
+    }
 }

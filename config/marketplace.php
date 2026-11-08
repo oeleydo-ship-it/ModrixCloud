@@ -23,4 +23,7 @@ return [
 
     // One-time download links expire after this many minutes.
     'download_minutes' => 10,
+
+    // Largest core platform release ZIP accepted in admin, in megabytes.
+    'core_max_mb' => (int) env('MARKETPLACE_CORE_MAX_MB', 200),
 ];

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Marketplace\Http\Controllers\AccountController;
 use Marketplace\Http\Controllers\Admin\AccessController;
 use Marketplace\Http\Controllers\Admin\CategoryController;
+use Marketplace\Http\Controllers\Admin\CoreReleaseController;
 use Marketplace\Http\Controllers\Admin\RepositoryController;
 use Marketplace\Http\Controllers\Admin\SalesController;
 use Marketplace\Http\Controllers\Admin\SettingsController;
@@ -87,6 +88,10 @@ Route::prefix('admin')->group(function () {
         Route::get('repository/{slug}', [RepositoryController::class, 'edit']);
         Route::post('repository/{slug}', [RepositoryController::class, 'update']);
         Route::get('updates', [RepositoryController::class, 'updates'])->name('admin.updates');
+        Route::get('core', [CoreReleaseController::class, 'index'])->name('admin.core');
+        Route::post('core', [CoreReleaseController::class, 'store']);
+        Route::post('core/{release}/publish', [CoreReleaseController::class, 'publish']);
+        Route::post('core/{release}/withdraw', [CoreReleaseController::class, 'withdraw']);
         Route::get('catalog', [RepositoryController::class, 'pricing'])->name('admin.catalog');
         Route::post('catalog', [RepositoryController::class, 'savePricing']);
 

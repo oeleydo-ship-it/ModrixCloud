@@ -8,6 +8,7 @@
                 'admin/repository' => 'Repository',
                 'admin/submissions' => 'Submissions',
                 'admin/updates' => 'Updates',
+                'admin/core' => 'Core releases',
                 'admin/categories' => 'Categories',
                 'admin/catalog' => 'Pricing',
                 'admin/licenses' => 'Licenses',
