@@ -57,7 +57,11 @@ class Licensing
             'license_id' => $license->id,
             'product' => $license->package->slug,
             'extension' => $license->package->identifier,
-            'type' => $license->type,
+            // Package type (module or theme), as in the signed release metadata: stores
+            // install a release only when extension, type and product match the license.
+            'type' => $license->package->type,
+            // How the license was obtained (free or paid).
+            'kind' => $license->type,
             'status' => $license->status,
             'activated' => $activated,
             'instance_id' => $instanceId,

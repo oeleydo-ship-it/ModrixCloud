@@ -54,7 +54,10 @@ class LicensingTest extends TestCase
         $this->assertSame($license->id, $token['license_id']);
         $this->assertSame('acme-reviews', $token['product']);
         $this->assertSame('acme/reviews', $token['extension']);
-        $this->assertSame('free', $token['type']);
+        // Same "type" as the release metadata (Releases), or stores refuse the download.
+        $this->assertSame($license->package->type, $token['type']);
+        $this->assertContains($token['type'], ['module', 'theme']);
+        $this->assertSame('free', $token['kind']);
         $this->assertSame('active', $token['status']);
         $this->assertFalse($token['activated']);
         $this->assertSame('store-1', $token['instance_id']);
