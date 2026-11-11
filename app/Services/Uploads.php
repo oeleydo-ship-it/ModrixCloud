@@ -73,8 +73,23 @@ class Uploads
 
             $manifest = json_decode((string) $zip->getFromIndex($index), true);
 
-            if (! is_array($manifest) || ($manifest['name'] ?? null) !== $identifier || ($manifest['version'] ?? null) !== $version) {
-                $fail('The ZIP manifest package identifier and version must match the listing.');
+            if (! is_array($manifest)) {
+                $fail("{$manifestName} in the ZIP is not valid JSON.");
+            }
+
+            // Say exactly which field differs and what the ZIP declares, so the form is easy to fix.
+            $mismatches = [];
+
+            if (($manifest['name'] ?? null) !== $identifier) {
+                $mismatches[] = 'Package identifier: you entered "'.$identifier.'", but '.$manifestName.' says "'.(is_string($manifest['name'] ?? null) ? $manifest['name'] : '(none)').'".';
+            }
+
+            if (($manifest['version'] ?? null) !== $version) {
+                $mismatches[] = 'Version: you entered "'.$version.'", but '.$manifestName.' says "'.(is_string($manifest['version'] ?? null) ? $manifest['version'] : '(none)').'". This is the package\'s own version, not the core\'s.';
+            }
+
+            if ($mismatches !== []) {
+                throw ValidationException::withMessages([$field => ['The form must match the package\'s '.$manifestName.'.', ...$mismatches]]);
             }
 
             if ($prefix !== '') {

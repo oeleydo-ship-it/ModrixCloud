@@ -65,6 +65,17 @@ class PublishTest extends TestCase
         $this->assertSame(0, Submission::query()->count());
     }
 
+    public function test_a_mismatch_says_which_field_differs_and_what_the_zip_declares()
+    {
+        $this->actingAs($this->customer());
+
+        $this->submit(['version' => '1.0.0-rc3'])->assertSessionHasErrors('package');
+
+        $messages = implode("\n", session('errors')->get('package'));
+        $this->assertStringContainsString('Version: you entered "1.0.0-rc3", but module.json says "1.0.0"', $messages);
+        $this->assertStringNotContainsString('Package identifier:', $messages);
+    }
+
     public function test_approval_publishes_the_package_with_a_release()
     {
         $publisher = $this->customer();
