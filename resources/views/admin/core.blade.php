@@ -11,6 +11,10 @@
         <label>Minimum PHP <input name="min_php" value="{{ old('min_php', '8.3') }}" required maxlength="16" placeholder="8.3"></label>
         <label class="wide">Release notes <textarea name="notes" rows="5" maxlength="20000">{{ old('notes') }}</textarea></label>
         <label class="wide">Package (ZIP) <input type="file" name="package" accept=".zip,application/zip" required></label>
+        @php($serverLimit = \Marketplace\Services\Uploads::serverLimitLabel())
+        @if ($serverLimit !== null)
+            <p class="wide meta">This server accepts uploads up to {{ $serverLimit }} (PHP <code>upload_max_filesize</code> / <code>post_max_size</code>). For a larger core ZIP, raise both in your hosting panel's PHP settings.</p>
+        @endif
         <div class="wide"><button type="submit">Upload release</button></div>
     </form>
 

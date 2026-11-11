@@ -8,8 +8,14 @@ PHP extensions: `ctype`, `curl`, `fileinfo`, `mbstring`, `openssl`,
 `pdo_mysql`, `tokenizer`, `xml` and `zip`. `sodium` is used when present;
 otherwise the bundled `paragonie/sodium_compat` does the signing.
 
-Set PHP `upload_max_filesize` and `post_max_size` to at least `25M`; package
-ZIPs may be up to 20 MB.
+Set PHP `upload_max_filesize` and `post_max_size` large enough for your
+uploads: package ZIPs may be up to 20 MB, core release ZIPs up to 200 MB
+(`256M` and `260M` cover both). `public/.user.ini` sets these on hosts that
+read it (PHP-FPM, LiteSpeed, most cPanel servers); elsewhere set them in the
+hosting panel's PHP settings (cPanel: MultiPHP INI Editor or Select PHP
+Version → Options). Admin → Core releases shows the limit the server
+actually applies. A request over the limit gets a "file is too large" page
+(HTTP 413).
 
 ## Shared hosting (cPanel, Plesk, DirectAdmin)
 

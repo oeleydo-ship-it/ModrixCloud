@@ -169,6 +169,43 @@ class Uploads
         return $relative;
     }
 
+    /**
+     * The largest upload PHP accepts on this server, in bytes: the smaller of
+     * upload_max_filesize and post_max_size (0 means no limit). Null if both
+     * are unlimited.
+     */
+    public static function serverLimit(): ?int
+    {
+        $limits = array_filter([
+            self::iniBytes((string) ini_get('upload_max_filesize')),
+            self::iniBytes((string) ini_get('post_max_size')),
+        ], fn (int $bytes) => $bytes > 0);
+
+        return $limits === [] ? null : min($limits);
+    }
+
+    /** The server limit as "8 MB", or null when unlimited. */
+    public static function serverLimitLabel(): ?string
+    {
+        $bytes = self::serverLimit();
+
+        return $bytes === null ? null : rtrim(rtrim(number_format($bytes / 1048576, 1, '.', ''), '0'), '.').' MB';
+    }
+
+    /** "8M", "1G", "512K" or plain bytes as bytes. */
+    public static function iniBytes(string $value): int
+    {
+        $value = trim($value);
+        $number = (int) $value;
+
+        return match (strtoupper(substr($value, -1))) {
+            'G' => $number * 1024 * 1024 * 1024,
+            'M' => $number * 1024 * 1024,
+            'K' => $number * 1024,
+            default => $number,
+        };
+    }
+
     /** Absolute path of a stored private file. */
     public function path(string $relative): string
     {
