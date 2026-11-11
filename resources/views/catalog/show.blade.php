@@ -67,10 +67,17 @@
             @endif
             <p class="license-note">One active store per license. Manage your key and connected store from your account.</p>
             <dl class="package-specs">
-                @foreach (['Version' => $product['version'], 'Platform' => $product['platform_version'], 'License' => $product['license'], 'Publisher' => $product['author'], 'Package' => $product['identifier']] as $label => $value)
+                @foreach (['Version' => $product['version'], 'Requires core' => $product['platform_version'], 'Latest core' => $core['latest_core'] ?? '—', 'License' => $product['license'], 'Publisher' => $product['author'], 'Package' => $product['identifier']] as $label => $value)
                     <div><dt>{{ $label }}</dt><dd>{{ $value }}</dd></div>
                 @endforeach
             </dl>
+            @if ($core['minimum_core'] === null && $core['latest_core'] !== null)
+                <p class="license-note">This version needs Modrix Commerce core {{ $product['platform_version'] }}, which is not released yet (latest core: {{ $core['latest_core'] }}).</p>
+            @elseif ($core['minimum_core'] !== null && $core['minimum_core'] !== $core['latest_core'])
+                <p class="license-note">Runs on Modrix Commerce core {{ $core['minimum_core'] }} or later. Update your store's core first if it is older.</p>
+            @elseif ($core['minimum_core'] !== null)
+                <p class="license-note">Needs Modrix Commerce core {{ $core['minimum_core'] }}. Update your store's core first if it is older.</p>
+            @endif
             @if (! empty($product['repository_url']))
                 <a class="source-link" href="{{ $product['repository_url'] }}" target="_blank" rel="noopener noreferrer">Source repository ↗</a>
             @endif

@@ -8,6 +8,7 @@ use Marketplace\Models\License;
 use Marketplace\Models\Package;
 use Marketplace\Services\Catalog;
 use Marketplace\Services\Connections;
+use Marketplace\Services\CoreReleases;
 
 /**
  * GET /api/marketplace/v1/catalog — published packages for the store's
@@ -16,7 +17,7 @@ use Marketplace\Services\Connections;
  */
 class CatalogController
 {
-    public function __invoke(Request $request, Connections $connections): JsonResponse
+    public function __invoke(Request $request, Connections $connections, CoreReleases $cores): JsonResponse
     {
         $connection = $connections->authenticate($request->bearerToken());
         $licenses = $connection === null ? collect() : License::query()
@@ -31,8 +32,8 @@ class CatalogController
             ->orderByDesc('featured')
             ->orderBy('name')
             ->get()
-            ->map(function (Package $p) use ($connection, $licenses) {
-                $row = self::row($p);
+            ->map(function (Package $p) use ($connection, $licenses, $cores) {
+                $row = self::row($p, $cores);
 
                 if ($connection !== null) {
                     /** @var License|null $license */
@@ -56,7 +57,7 @@ class CatalogController
     /**
      * @return array<string, mixed>
      */
-    public static function row(Package $package): array
+    public static function row(Package $package, ?CoreReleases $cores = null): array
     {
         return [
             'identifier' => $package->identifier,
@@ -73,6 +74,9 @@ class CatalogController
             'repository_url' => $package->repository_url,
             'url' => url('/item/'.$package->slug),
             'latest_version' => $package->latestRelease()?->version,
+            // The core the latest version needs, and the first published core release that meets it.
+            'platform_version' => $platform = (string) ($package->latestRelease()?->platform_version ?? $package->platform_version),
+            'minimum_core' => $platform === '' ? null : ($cores ?? app(CoreReleases::class))->firstSatisfying($platform)?->version,
             // Free packages download directly; paid ones through a license.
             'download_url' => $package->is_free ? url('/download/'.$package->slug) : null,
         ];

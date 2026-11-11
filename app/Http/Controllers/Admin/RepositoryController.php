@@ -149,6 +149,16 @@ class RepositoryController
 
             if ($zip !== null) {
                 $releases->publish($package, $uploads->path($zip), $data['version'], $package->platform_version);
+
+                return;
+            }
+
+            // A changed platform version applies to the release for the version field,
+            // so stores on an older core stop being offered it.
+            $release = $package->releases()->where('version', $package->version)->first();
+
+            if ($release !== null && $release->platform_version !== $package->platform_version) {
+                $releases->setPlatformVersion($release, $package->platform_version);
             }
         });
 

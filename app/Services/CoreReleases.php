@@ -3,6 +3,7 @@
 namespace Marketplace\Services;
 
 use Composer\Semver\Comparator;
+use Composer\Semver\Semver;
 use Composer\Semver\VersionParser;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -17,6 +18,9 @@ use ZipArchive;
 class CoreReleases
 {
     private const MAX_FILES = 50000;
+
+    /** @var array<string, CoreRelease|null> per-instance lookups by constraint */
+    private array $firstFor = [];
 
     public function __construct(private readonly SigningKey $key) {}
 
@@ -141,6 +145,43 @@ class CoreReleases
                 && ($php === null || $php === '' || version_compare($php, $r->min_php, '>=')))
             ->sort(fn (CoreRelease $a, CoreRelease $b) => $this->greater($a->version, $b->version) ? -1 : ($this->greater($b->version, $a->version) ? 1 : 0))
             ->values();
+    }
+
+    /** The newest published core release. */
+    public function latest(): ?CoreRelease
+    {
+        return $this->newerThan(null, null)->first();
+    }
+
+    /** The oldest published core release that meets a package's platform constraint. */
+    public function firstSatisfying(string $constraint): ?CoreRelease
+    {
+        return $this->firstFor[$constraint] ??= $this->newerThan(null, null)
+            ->reverse()
+            ->first(function (CoreRelease $r) use ($constraint) {
+                try {
+                    return Semver::satisfies($r->version, $constraint);
+                } catch (Throwable) {
+                    return false;
+                }
+            });
+    }
+
+    /**
+     * What a store needs to run a package version that requires a newer
+     * core: the constraint, the store's core, the first published core that
+     * meets it and the newest published core (either may be null).
+     *
+     * @return array{required: string, current: string|null, minimum_core: string|null, latest_core: string|null}
+     */
+    public function requirement(string $constraint, ?string $current): array
+    {
+        return [
+            'required' => $constraint,
+            'current' => $current,
+            'minimum_core' => $this->firstSatisfying($constraint)?->version,
+            'latest_core' => $this->latest()?->version,
+        ];
     }
 
     /**

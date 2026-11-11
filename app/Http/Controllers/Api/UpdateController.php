@@ -5,14 +5,17 @@ namespace Marketplace\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Marketplace\Models\License;
+use Marketplace\Services\CoreReleases;
 use Marketplace\Services\Releases;
 
 /**
- * POST updates — the newest signed release this store may install.
+ * POST updates — the newest signed release this store may install. When a
+ * newer version exists but needs a newer core than the store runs, the reply
+ * says so in core_update (required constraint, first and latest core).
  */
 class UpdateController
 {
-    public function __invoke(Request $request, Releases $releases): JsonResponse
+    public function __invoke(Request $request, Releases $releases, CoreReleases $cores): JsonResponse
     {
         $data = ApiError::validate($request, [
             'key' => ['required', 'string', 'max:64'],
@@ -39,10 +42,29 @@ class UpdateController
             return response()->json(['available' => false, 'reason' => 'Activate this license on the store first.', 'release' => null]);
         }
 
-        $release = $releases->newestFor($license->package, $data['installed_version'] ?? null, $data['platform_version'] ?? null);
+        $platform = $data['platform_version'] ?? null;
+        $release = $releases->newestFor($license->package, $data['installed_version'] ?? null, $platform);
 
-        return response()->json($release === null
-            ? ['available' => false, 'reason' => 'You have the latest version for this platform.', 'release' => null]
-            : ['available' => true, 'release' => $releases->payload($release)]);
+        if ($release !== null) {
+            return response()->json(['available' => true, 'release' => $releases->payload($release)]);
+        }
+
+        $blocked = $platform === null || $platform === '' ? null : $releases->newestNeedingCore($license->package, $data['installed_version'] ?? null, $platform);
+
+        if ($blocked === null) {
+            return response()->json(['available' => false, 'reason' => 'You have the latest version for this platform.', 'release' => null]);
+        }
+
+        $core = $cores->requirement($blocked->platform_version, $platform);
+        $target = $core['minimum_core'] !== null
+            ? "Update the core to {$core['minimum_core']} or later first."
+            : 'A core release that supports it is not available yet.';
+
+        return response()->json([
+            'available' => false,
+            'reason' => "Version {$blocked->version} needs Modrix Commerce core {$blocked->platform_version}, but this store runs {$platform}. {$target}",
+            'release' => null,
+            'core_update' => ['version' => $blocked->version, ...$core],
+        ]);
     }
 }

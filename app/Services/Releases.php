@@ -40,19 +40,52 @@ class Releases
             ],
         );
 
+        $release->setRelation('package', $package);
+        $this->setPlatformVersion($release, $platformVersion);
+
+        return $release;
+    }
+
+    /**
+     * The newest release above the installed version that the store's
+     * platform version does NOT satisfy: an update waiting on a core update.
+     */
+    public function newestNeedingCore(Package $package, ?string $installed, string $platform): ?PackageRelease
+    {
+        $best = null;
+
+        foreach ($package->releases()->get() as $release) {
+            if (($installed !== null && $installed !== '' && ! $this->greater($release->version, $installed)) || $this->satisfies($platform, $release->platform_version)) {
+                continue;
+            }
+
+            if ($best === null || $this->greater($release->version, $best->version)) {
+                $best = $release;
+            }
+        }
+
+        return $best;
+    }
+
+    /**
+     * Changes the core constraint of a published release and signs it again,
+     * e.g. when a release turns out to need a newer core than it declared.
+     */
+    public function setPlatformVersion(PackageRelease $release, string $platformVersion): void
+    {
+        $package = $release->package;
+        $release->forceFill(['platform_version' => $platformVersion])->save();
         $signed = $this->key->sign([
             'extension' => $package->identifier,
             'type' => $package->type,
             'product' => $package->slug,
-            'version' => $version,
+            'version' => $release->version,
             'sha256' => $release->sha256,
             'size' => $release->size,
             'platform_version' => $platformVersion,
             'release_id' => $release->id,
         ]);
         $release->forceFill(['signed_metadata' => $signed['data'], 'signature' => $signed['signature']])->save();
-
-        return $release;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Tests\Feature\Api;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Marketplace\Models\CoreRelease;
 use Marketplace\Models\License;
 use Marketplace\Models\Package;
 use Marketplace\Models\User;
@@ -78,6 +79,71 @@ class UpdatesAndDownloadsTest extends TestCase
         $this->assertIsInt($metadata['size']);
         $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $metadata['sha256']);
         $this->assertSame('^1.0', $metadata['platform_version']);
+    }
+
+    private function core(string $version): void
+    {
+        CoreRelease::query()->create(['version' => $version, 'min_php' => '8.3', 'path' => "core/{$version}.zip", 'sha256' => str_repeat('a', 64), 'size' => 1, 'status' => CoreRelease::PUBLISHED, 'signed_metadata' => [], 'signature' => '', 'published_at' => now()]);
+    }
+
+    public function test_an_update_for_a_newer_core_names_the_core_to_install()
+    {
+        $this->publish('1.0.0');
+        $this->publish('2.0.0', '>=1.0.0-rc.2');
+        $this->core('1.0.0-rc.1');
+        $this->core('1.0.0-rc.2');
+        $this->core('1.0.0');
+
+        $reply = $this->update('1.0.0', '1.0.0-rc.1');
+
+        $this->assertFalse($reply['available']);
+        $this->assertSame(['version' => '2.0.0', 'required' => '>=1.0.0-rc.2', 'current' => '1.0.0-rc.1', 'minimum_core' => '1.0.0-rc.2', 'latest_core' => '1.0.0'], $reply['core_update']);
+        $this->assertStringContainsString('Update the core to 1.0.0-rc.2 or later first.', $reply['reason']);
+
+        $this->assertTrue($this->update('1.0.0', '1.0.0-rc.2')['available']);
+    }
+
+    public function test_an_update_for_an_unreleased_core_says_none_is_available_yet()
+    {
+        $this->publish('2.0.0', '^2.0');
+        $this->core('1.0.0');
+
+        $reply = $this->update(null, '1.0.0');
+
+        $this->assertNull($reply['core_update']['minimum_core']);
+        $this->assertSame('1.0.0', $reply['core_update']['latest_core']);
+        $this->assertStringContainsString('not available yet', $reply['reason']);
+
+        $this->get('/item/acme-reviews')->assertOk()->assertSee('Requires core')->assertSee('which is not released yet (latest core: 1.0.0)');
+        $this->getJson(self::API.'catalog')->assertJsonPath('products.0.platform_version', '^2.0')->assertJsonPath('products.0.minimum_core', null);
+    }
+
+    public function test_correcting_a_release_core_requirement_re_signs_it()
+    {
+        $release = $this->publish('2.0.0');
+        app(Releases::class)->setPlatformVersion($release, '>=1.0.0-rc.2');
+
+        $release->refresh();
+        $this->assertSame('>=1.0.0-rc.2', $release->platform_version);
+        $this->assertSame('>=1.0.0-rc.2', $release->signed_metadata['platform_version']);
+        $this->assertTrue(Signing::verify($release->signed_metadata, $release->signature, [app(SigningKey::class)->publicKey()]));
+        $this->assertFalse($this->update(null, '1.0.0-rc.1')['available']);
+    }
+
+    public function test_admins_correct_the_core_requirement_from_the_package_form()
+    {
+        $this->publish('2.0.0');
+        $this->package->update(['version' => '2.0.0', 'platform_version' => '^1.0', 'summary' => 'Stars']);
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+
+        $this->actingAs($admin)->post('/admin/repository/acme-reviews', [
+            'name' => 'Reviews', 'summary' => 'Stars', 'tier' => 'free', 'price' => '0', 'status' => 'published',
+            'version' => '2.0.0', 'platform_version' => '>=1.0.0-rc.2',
+        ])->assertRedirect('/admin/repository/acme-reviews');
+
+        $this->assertSame('>=1.0.0-rc.2', $this->package->releases()->value('platform_version'));
+        $this->assertFalse($this->update(null, '1.0.0-rc.1')['available']);
     }
 
     public function test_nothing_newer_means_no_update()

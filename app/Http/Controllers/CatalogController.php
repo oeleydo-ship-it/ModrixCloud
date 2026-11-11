@@ -8,6 +8,7 @@ use Marketplace\Models\Category;
 use Marketplace\Models\Package;
 use Marketplace\Models\Setting;
 use Marketplace\Services\Catalog;
+use Marketplace\Services\CoreReleases;
 use Marketplace\Services\Releases;
 use Marketplace\Services\Uploads;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,7 +57,7 @@ class CatalogController
         ]);
     }
 
-    public function show(Request $request, string $slug): View
+    public function show(Request $request, string $slug, CoreReleases $cores): View
     {
         $product = $this->catalog->find($slug) ?? abort(404);
         $related = $this->catalog->published()
@@ -69,6 +70,8 @@ class CatalogController
             'product' => $product,
             'owned' => $this->catalog->owns($request->user(), $product['model']),
             'related' => $related,
+            // The core this version needs, the first published core that meets it and the newest core.
+            'core' => $cores->requirement((string) $product['platform_version'], null),
             'currency' => (string) (Setting::get('currency') ?: config('marketplace.currency')),
         ]);
     }
