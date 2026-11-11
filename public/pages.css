@@ -67,3 +67,14 @@ button.small, a.small { font-size:0.85rem; padding:0.3rem 0.7rem; }
 .notice ul { margin:0.3rem 0 0; padding-left:1.2rem; }
 .compat .issue-malicious { color:#991b1b; font-weight:600; }
 .compat .issue-suspicious { color:#92400e; }
+
+/* Page links (resources/views/partials/pagination.blade.php) */
+.pager { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; font-size: 14px; }
+.pager-pages { display: flex; flex-wrap: wrap; gap: 6px; }
+.pager-step, .pager-page { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 12px; border: 1px solid var(--line, #e6e8ee); border-radius: 8px; background: #fff; color: #12141a; text-decoration: none; line-height: 1; }
+.pager a:hover { border-color: #155e55; color: #155e55; }
+.pager-page[aria-current='page'] { background: #155e55; border-color: #155e55; color: #fff; }
+.pager-step[aria-disabled='true'] { color: #a3a8b5; background: #f6f7fb; cursor: default; }
+.pager-gap { display: inline-flex; align-items: center; padding: 0 4px; color: #5c6170; }
+.pager-count { margin-left: auto; color: #5c6170; }
+@media (max-width: 600px) { .pager-count { margin-left: 0; width: 100%; } }

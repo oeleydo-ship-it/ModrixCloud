@@ -50,6 +50,26 @@ class AdminTest extends TestCase
         $this->post('/admin/login', ['email' => 'boss@example.test', 'password' => 'Secret-pass-1'])->assertRedirect('/admin');
     }
 
+    public function test_the_repository_shows_30_packages_a_page_with_plain_page_links()
+    {
+        $admin = $this->admin();
+
+        for ($i = 1; $i <= 35; $i++) {
+            $this->package(['name' => sprintf('Pkg %02d', $i)]);
+        }
+
+        $this->actingAs($admin)->get('/admin/repository')->assertOk()
+            ->assertSee('Pkg 30')->assertDontSee('Pkg 31')
+            ->assertSee('class="pager"', false)
+            ->assertSee('Showing 1–30 of 35')
+            ->assertSee('rel="next"', false)
+            ->assertDontSee('<svg', false);
+
+        $this->get('/admin/repository?page=2')->assertOk()
+            ->assertSee('Pkg 35')->assertDontSee('Pkg 30')
+            ->assertSee('rel="prev"', false);
+    }
+
     public function test_editing_a_package_and_adding_one()
     {
         $admin = $this->admin();

@@ -2,6 +2,7 @@
 
 namespace Marketplace\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Marketplace\Services\MailSettings;
@@ -29,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Indexed strings fit MySQL 5.7 / MariaDB 10.3 utf8mb4 index limits.
         Schema::defaultStringLength(191);
+
+        // The site has no Tailwind, so Laravel's default page links render giant arrows.
+        Paginator::defaultView('partials.pagination');
 
         // SMTP settings saved in the admin, applied before the first mailer is built.
         $this->app->afterResolving('mail.manager', fn () => $this->app->make(MailSettings::class)->apply());

@@ -44,7 +44,7 @@ class RepositoryController
             'bundled' => $this->bundledStatus(),
             'packages' => Package::query()
                 ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w->where('name', 'like', "%{$q}%")->orWhere('identifier', 'like', "%{$q}%")))
-                ->orderBy('name')->paginate(50)->withQueryString(),
+                ->orderBy('name')->paginate(30)->withQueryString(),
         ]);
     }
 
