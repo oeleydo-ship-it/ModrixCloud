@@ -24,6 +24,31 @@ class PublishTest extends TestCase
         ], $overrides));
     }
 
+    public function test_the_update_page_lists_own_and_marketplace_packages_in_a_dropdown()
+    {
+        $customer = $this->customer();
+        $other = $this->customer();
+        $this->package(['identifier' => 'modrixcommerce/razorpay', 'slug' => 'razorpay', 'name' => 'Razorpay']);
+        $this->package(['identifier' => 'acme/mine', 'slug' => 'acme-mine', 'name' => 'Mine', 'publisher_id' => $customer->id]);
+        $this->package(['identifier' => 'acme/theirs', 'slug' => 'acme-theirs', 'name' => 'Theirs', 'publisher_id' => $other->id]);
+
+        $this->actingAs($customer)->get('/submit/update')
+            ->assertOk()
+            ->assertSee('<select name="identifier"', false)
+            ->assertSee('modrixcommerce/razorpay')
+            ->assertSee('acme/mine')
+            ->assertDontSee('acme/theirs')
+            ->assertDontSee('placeholder="vendor/package"', false);
+    }
+
+    public function test_updating_an_unknown_package_says_to_submit_it_first()
+    {
+        $this->actingAs($this->customer());
+
+        $this->post('/submit/update', ['identifier' => 'modrixcommerce/missing', 'version' => '2.0.0', 'changelog' => 'New', 'package' => $this->packageZip('modrixcommerce/missing', '2.0.0')])
+            ->assertSessionHasErrors(['identifier' => 'That package is not in the marketplace yet. Use Submit a package to add it first.']);
+    }
+
     public function test_submitting_needs_sign_in()
     {
         $this->get('/submit')->assertRedirect('/account/login?next=%2Fsubmit');

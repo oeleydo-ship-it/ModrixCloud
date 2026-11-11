@@ -15,6 +15,12 @@ class ProductLabelServiceProvider extends ServiceProvider
 {
     public const MODULE = 'modrixcommerce/product-label';
 
+    public function register(): void
+    {
+        // Resolved for every product card on a page: build it once per request.
+        $this->app->scoped(LabelResolver::class);
+    }
+
     public function boot(ProductLabels $labels): void
     {
         $labels->register(self::MODULE, function (mixed $product): array {

@@ -651,6 +651,9 @@ export default function CircuitProduct({
                 name={product.name}
                 image={image?.url}
                 variant={variant}
+                options={product.options}
+                selected={selected}
+                onOption={onOption}
                 hasOptions={product.options.length > 0}
                 showBuyButton={product.show_buy_button}
             />

@@ -7,7 +7,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Modrix Cloud on this store. Routes, navigation and settings come from
+ * Modrix Cloud on this store. Routes and navigation come from
  * module.json; the provider binds the client and schedules the daily
  * license check (it never disables anything).
  */

@@ -17,25 +17,19 @@
     "capabilities": [
         "admin.routes",
         "admin.navigation",
-        "settings",
         "console.commands",
-        "scheduled.tasks"
+        "scheduled.tasks",
+        "content_security"
     ],
+    "content_security": {
+        "img-src": ["https://cloud-apps.modrixcommerce.com"]
+    },
     "routes": {
         "admin": "routes/admin.php"
     },
     "assets": {
         "pages": "resources/js/pages"
     },
-    "settings": [
-        {
-            "key": "cloud_url",
-            "type": "string",
-            "label": "Modrix Cloud address",
-            "help": "Leave empty to use the address from the server configuration (ECOMODULAR_MARKETPLACE_URL). The keys that verify packages are set only in the server configuration.",
-            "max_length": 255
-        }
-    ],
     "admin_navigation": [
         {
             "key": "cloud",

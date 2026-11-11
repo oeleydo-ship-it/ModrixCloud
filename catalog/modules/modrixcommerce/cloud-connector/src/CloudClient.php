@@ -2,8 +2,8 @@
 
 namespace EcoModular\CloudConnector;
 
-use App\Core\Extensions\ModuleSettingsSchema;
 use App\Core\Marketplace\Signing;
+use App\Core\Marketplace\TrustedKeys;
 use App\Core\Platform;
 use App\Core\Settings\SecretSettings;
 use App\Core\Settings\SettingsRepository;
@@ -42,12 +42,25 @@ final class CloudClient
         private readonly SecretSettings $secrets,
     ) {}
 
-    /** Modrix Cloud's address: the connector setting, else ECOMODULAR_MARKETPLACE_URL. */
+    /** The official Modrix Cloud, so a fresh store connects without any configuration. */
+    public const DEFAULT_URL = 'https://cloud-apps.modrixcommerce.com';
+
+    /**
+     * The official Modrix Cloud's Ed25519 public key (key id e6064ae59fe8ad04),
+     * which signs every license and release it serves. Hardcoded so a store
+     * connects without any configuration; must equal TrustedKeys::OFFICIAL.
+     */
+    public const TRUSTED_KEY = 'hfNCkhP3lhEjNPjg6Sd5D5s187ebC5ButhVJe+ilKKk=';
+
+    /**
+     * Modrix Cloud's address. Merchants cannot change it; ECOMODULAR_MARKETPLACE_URL
+     * remains only so developers can point a store at a local cloud.
+     */
     public function baseUrl(): string
     {
-        $setting = app(ModuleSettingsSchema::class)->of(CloudConnectorServiceProvider::MODULE, 'cloud_url', '');
+        $url = (string) config('ecomodular.marketplace.url');
 
-        return rtrim(is_string($setting) && $setting !== '' ? $setting : (string) config('ecomodular.marketplace.url'), '/');
+        return rtrim($url !== '' ? $url : self::DEFAULT_URL, '/');
     }
 
     public function connected(): bool
@@ -372,7 +385,7 @@ final class CloudClient
      */
     public function trustedKeys(): array
     {
-        return array_values(array_filter((array) config('ecomodular.marketplace.trusted_keys', []), 'is_string'));
+        return array_values(array_unique([self::TRUSTED_KEY, ...TrustedKeys::all()]));
     }
 
     /**

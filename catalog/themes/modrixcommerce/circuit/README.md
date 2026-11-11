@@ -1,6 +1,6 @@
 # Circuit Market
 
-An electronics megastore theme for EcoModular: navy header with a rounded search, a category icon rail and
+An electronics megastore theme for Modrix Commerce: navy header with a rounded search, a category icon rail and
 recently viewed products; a homepage mosaic with a deal countdown, voucher strip, popular picks, promo mosaic,
 brands, a product spotlight, service features and support cards; catalog filters with a grid switch; a detailed
 product page; cart and footer.

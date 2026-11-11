@@ -58,9 +58,14 @@ class PublishController
 
     public function edit(Request $request): View
     {
-        return view('publish.update', [
-            'packages' => Package::query()->where('publisher_id', $request->user()->id)->orderBy('name')->get(),
-        ]);
+        // The publisher's own packages plus marketplace-owned ones (no publisher), which anyone may propose updates for.
+        $packages = Package::query()
+            ->where(fn ($q) => $q->where('publisher_id', $request->user()->id)->orWhereNull('publisher_id'))
+            ->with('releases')
+            ->orderBy('type')->orderBy('name')
+            ->get();
+
+        return view('publish.update', ['packages' => $packages]);
     }
 
     public function update(Request $request, Uploads $uploads): RedirectResponse
@@ -76,7 +81,11 @@ class PublishController
         $package = Package::query()->where('identifier', $data['identifier'])->first();
 
         // Packages without a publisher were added by the marketplace; anyone may propose an update for review.
-        if ($package === null || ($package->publisher_id !== null && $package->publisher_id !== $request->user()->id)) {
+        if ($package === null) {
+            throw ValidationException::withMessages(['identifier' => 'That package is not in the marketplace yet. Use Submit a package to add it first.']);
+        }
+
+        if (($package->publisher_id !== null && $package->publisher_id !== $request->user()->id)) {
             throw ValidationException::withMessages(['identifier' => 'Choose one of your published packages.']);
         }
 

@@ -138,6 +138,9 @@ export default function PawzyProduct({
                                 name={product.name}
                                 image={product.images[0]?.url}
                                 variant={variant}
+                                options={product.options}
+                                selected={selected}
+                                onOption={onOption}
                             />
                             <Form
                                 key={variant.id}

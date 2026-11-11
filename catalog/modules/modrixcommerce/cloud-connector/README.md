@@ -16,8 +16,8 @@ Connects a store to **Modrix Cloud**, the official catalog of Modrix Commerce th
 - **Connecting:** uses an authorization code with PKCE (S256). The code is valid for 5 minutes and works once.
 - **Token:** the store keeps the connection token encrypted and never sends it to the browser.
 - **Permissions:** connecting and installing need the `extensions.install` permission and a recent password confirmation.
-- **Trusted keys:** the keys that verify packages are read only from `ECOMODULAR_MARKETPLACE_TRUSTED_KEYS`.
-- **Address:** the **Modrix Cloud address** setting overrides `ECOMODULAR_MARKETPLACE_URL`.
+- **Address and key are built in:** the connector always talks to the official `https://cloud-apps.modrixcommerce.com` and trusts its signing key (`CloudClient::DEFAULT_URL` and `CloudClient::TRUSTED_KEY`), so new stores need no configuration and merchants cannot point it elsewhere.
+- **Developers only:** `ECOMODULAR_MARKETPLACE_URL` points a store at another cloud (e.g. a local one), and `ECOMODULAR_MARKETPLACE_TRUSTED_KEYS` adds keys alongside the built-in one.
 
 ## Data
 
