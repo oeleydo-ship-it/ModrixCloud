@@ -84,6 +84,12 @@ class Submissions
         });
     }
 
+    /** The note on a submission rejected automatically by the security scan. */
+    public static function securityNote(CompatibilityReport $report): string
+    {
+        return mb_substr('Rejected automatically by the security scan: '.implode(' ', $report->malicious()), 0, 2000);
+    }
+
     public function reject(Submission $submission, User $reviewer, string $note): void
     {
         $submission->forceFill(['status' => 'rejected', 'reviewed_by' => $reviewer->id, 'reviewed_at' => now(), 'review_note' => $note])->save();

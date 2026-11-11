@@ -193,12 +193,12 @@ PHP;
 
                 foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)) as $file) {
                     $relative = strtr(substr($file->getPathname(), strlen($dir) + 1), [DIRECTORY_SEPARATOR => '/']);
-                    // Contents matter only for manifests and PHP; other files just need to exist.
-                    $files[$relative] = preg_match('/\.(php|json)$/', $relative) ? (string) file_get_contents($file->getPathname()) : '';
+                    $files[$relative] = (string) file_get_contents($file->getPathname());
                 }
 
                 $report = $this->scan($this->zip($files), $type);
-                $this->assertTrue($report->passed(), basename($dir).': '.implode("\n", $report->errors()));
+                $this->assertTrue($report->passed(), basename($dir).': '.implode("\n", [...$report->errors(), ...$report->malicious()]));
+                $this->assertSame([], $report->suspicious(), basename($dir));
             }
         }
     }

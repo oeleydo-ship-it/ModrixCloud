@@ -24,7 +24,7 @@
                                 @if ($scan === null)
                                     <span class="meta">Not scanned</span>
                                 @else
-                                    <span class="{{ $scan->passed() ? ($scan->warnings() ? 'compat-warn' : 'compat-ok') : 'compat-fail' }}">{{ $scan->passed() ? 'Compatible' : 'Problems found' }}</span>
+                                    <span class="{{ $scan->passed() ? ($scan->warnings() ? 'compat-warn' : 'compat-ok') : 'compat-fail' }}">{{ $scan->malicious() ? 'Possible malicious code' : ($scan->passed() ? 'Compatible' : 'Problems found') }}</span>
                                     @if ($scan->minimumCore)<br><span class="meta">Needs core {{ $scan->minimumCore }}+</span>@endif
                                     @foreach ($scan->issues as $issue)<br><span class="meta">{{ ucfirst($issue['level']) }}: {{ $issue['message'] }}</span>@endforeach
                                 @endif

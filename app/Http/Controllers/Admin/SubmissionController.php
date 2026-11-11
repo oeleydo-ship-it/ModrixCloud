@@ -63,6 +63,12 @@ class SubmissionController
         $data['compatibility'] = $report->toArray();
         $submission->forceFill(['data' => $data])->save();
 
+        if ($report->malicious() !== []) {
+            $submission->forceFill(['status' => 'rejected', 'reviewed_at' => now(), 'review_note' => Submissions::securityNote($report)])->save();
+
+            return redirect('/admin/submissions')->with('notice', $submission->identifier.' was rejected automatically: the security scan found possible malicious code.');
+        }
+
         $notice = $report->passed()
             ? $submission->identifier.' passed the compatibility scan.'
             : $submission->identifier.' has '.count($report->errors()).' compatibility problem(s); see the scan below.';

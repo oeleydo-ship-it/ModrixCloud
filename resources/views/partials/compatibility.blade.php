@@ -1,13 +1,16 @@
 {{-- Compatibility scan result for a submission. Expects $report (CompatibilityReport|null). --}}
 <section class="compat" aria-label="Compatibility scan">
-    <h3>Compatibility scan</h3>
+    <h3>Compatibility and security scan</h3>
     @if ($report === null)
         <p class="meta">Not scanned (submitted before scanning was added). Rescan it before approving.</p>
     @else
         @php($errors_ = $report->errors())
-        @php($warnings = $report->warnings())
-        <p class="{{ $errors_ ? 'compat-fail' : ($warnings ? 'compat-warn' : 'compat-ok') }}">
-            @if ($errors_)
+        @php($malicious = $report->malicious())
+        @php($warnings = [...$report->warnings(), ...$report->suspicious()])
+        <p class="{{ $malicious || $errors_ ? 'compat-fail' : ($warnings ? 'compat-warn' : 'compat-ok') }}">
+            @if ($malicious)
+                <strong>Possible malicious code ({{ count($malicious) }} {{ \Illuminate\Support\Str::plural('finding', count($malicious)) }}).</strong> Rejected automatically; do not install it.
+            @elseif ($errors_)
                 {{ count($errors_) }} {{ \Illuminate\Support\Str::plural('problem', count($errors_)) }} would stop stores from installing it.
             @elseif ($warnings)
                 Compatible, with {{ count($warnings) }} {{ \Illuminate\Support\Str::plural('note', count($warnings)) }}.

@@ -28,6 +28,33 @@ class CompatibilityScanner
 
     private const NAME = '/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/';
 
+    /** Files are read for the security scan up to this size. */
+    private const MAX_SCAN_BYTES = 2 * 1024 * 1024;
+
+    /** Files a store package never needs: other server-side scripts, server config and executables. */
+    private const BLOCKED_FILES = '/\.(phtml|phar|php[3-8]|phps|pht|pgif|shtml|cgi|pl|py|rb|sh|bash|bat|cmd|ps1|vbs|exe|dll|so|dylib|com|jar|bin)$|(^|\/)(\.htaccess|\.user\.ini|php\.ini|web\.config)$/i';
+
+    /** PHP functions that run shell commands or code built at run time: always rejected. */
+    private const DANGEROUS_FUNCTIONS = [
+        'exec' => 'runs shell commands', 'shell_exec' => 'runs shell commands', 'system' => 'runs shell commands',
+        'passthru' => 'runs shell commands', 'proc_open' => 'runs shell commands', 'popen' => 'runs shell commands',
+        'pcntl_exec' => 'runs programs', 'create_function' => 'runs code built at run time', 'dl' => 'loads PHP extensions',
+    ];
+
+    /** PHP functions with rare legitimate uses in a module: flagged for the reviewer. */
+    private const RISKY_FUNCTIONS = [
+        'fsockopen' => 'opens raw network sockets', 'pfsockopen' => 'opens raw network sockets',
+        'stream_socket_client' => 'opens raw network sockets', 'stream_socket_server' => 'listens on a network port',
+        'socket_create' => 'opens raw network sockets', 'gzinflate' => 'unpacks compressed data (often used to hide code)',
+        'gzuncompress' => 'unpacks compressed data (often used to hide code)', 'gzdecode' => 'unpacks compressed data (often used to hide code)',
+        'str_rot13' => 'decodes scrambled text (often used to hide code)', 'convert_uudecode' => 'decodes hidden data',
+        'putenv' => 'changes the server environment', 'ignore_user_abort' => 'keeps running after the request ends',
+        'pcntl_fork' => 'starts background processes', 'posix_kill' => 'signals other processes', 'symlink' => 'creates symbolic links',
+    ];
+
+    /** Names of well-known web shells and browser miners. */
+    private const SIGNATURES = '/FilesMan|c99shell|r57shell|b374k|WSOsetcookie|IndoXploit|AnonymousFox|coinhive|coin-hive|cryptonight|webminepool|minero\.cc|crypto-loot|coinimp|jsecoin/i';
+
     /** @var list<array{level: string, message: string}> */
     private array $issues = [];
 
@@ -60,6 +87,9 @@ class CompatibilityScanner
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $this->names[str_replace('\\', '/', (string) $zip->getNameIndex($i))] = true;
             }
+
+            // Runs first, so a package with a broken manifest is still checked for malicious code.
+            $this->security($zip, $type);
 
             $manifestName = $type === 'theme' ? 'theme.json' : 'module.json';
             $manifest = json_decode((string) $zip->getFromName($manifestName), true);
@@ -259,6 +289,163 @@ class CompatibilityScanner
                     $this->use((array_key_exists($known, $places) ? 'place' : 'slot')." \"{$known}\"", $version);
                 }
             }
+        }
+    }
+
+    /**
+     * Looks for malicious code. Files are read as text and PHP is tokenised,
+     * never run. "Malicious" findings reject the package automatically;
+     * "suspicious" ones are shown to the reviewer.
+     */
+    private function security(ZipArchive $zip, string $type): void
+    {
+        foreach (array_keys($this->names) as $name) {
+            if (str_ends_with($name, '/') || str_starts_with($name, '__MACOSX/')) {
+                continue;
+            }
+
+            if (preg_match(self::BLOCKED_FILES, $name) === 1) {
+                $this->malicious("{$name}: packages may not contain server scripts, server configuration or executable files.");
+
+                continue;
+            }
+
+            $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+            if ($type === 'theme' && $extension === 'php') {
+                $this->error("{$name}: themes cannot contain PHP files.");
+            }
+
+            $stat = $zip->statName($name);
+
+            if ($stat === false) {
+                continue;
+            }
+
+            $code = in_array($extension, ['php', 'js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'svg', 'html', 'htm'], true);
+
+            if ($stat['size'] > self::MAX_SCAN_BYTES) {
+                if ($code) {
+                    $this->suspicious("{$name} is larger than 2 MB and was not scanned. Check it by hand.");
+                }
+
+                continue;
+            }
+
+            $text = (string) $zip->getFromName($name);
+
+            if (preg_match(self::SIGNATURES, $text, $m) === 1) {
+                $this->malicious("{$name} contains \"{$m[0]}\", the name of a known web shell or browser crypto-miner.");
+            }
+
+            if ($extension === 'php') {
+                $this->phpThreats($name, $text);
+            } elseif (! in_array($extension, ['md', 'txt'], true) && preg_match($this->isBinary($extension) ? '/<\?php\s/i' : '/<\?(php\s|=)/i', $text) === 1) {
+                // PHP hidden in an image, font, stylesheet or data file. Binary
+                // data can hold the three bytes "<?=" by chance, so images and
+                // fonts are checked for the full "<?php" tag only.
+                $this->malicious("{$name} hides PHP code in a .{$extension} file.");
+            }
+
+            if (in_array($extension, ['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'html', 'htm'], true)) {
+                $this->scriptThreats($name, $text);
+            }
+
+            if ($extension === 'svg' && preg_match('/<script|\bon[a-z]+\s*=|javascript:/i', $text) === 1) {
+                $this->malicious("{$name} is an SVG image with scripts in it, which could run on the store's pages.");
+            }
+
+            if ($code && preg_match('/[\'"`][A-Za-z0-9+\/=]{2000,}[\'"`]/', $text) === 1) {
+                $this->suspicious("{$name} contains a very long encoded string, which can hide code.");
+            }
+        }
+    }
+
+    private function isBinary(string $extension): bool
+    {
+        return in_array($extension, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'ico', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'zip', 'pdf', 'mp4', 'webm', 'mp3'], true);
+    }
+
+    private function phpThreats(string $name, string $php): void
+    {
+        $skip = [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT];
+        $tokens = array_values(array_filter(token_get_all($php), fn ($t) => ! is_array($t) || ! in_array($t[0], $skip, true)));
+        $found = [];
+        $flag = function (string $key, string $message, bool $malicious) use (&$found) {
+            if (! isset($found[$key])) {
+                $found[$key] = true;
+                $malicious ? $this->malicious($message) : $this->suspicious($message);
+            }
+        };
+
+        foreach ($tokens as $i => $token) {
+            if ($token === '`') {
+                $flag('`', "{$name} runs shell commands with the backtick operator.", true);
+
+                continue;
+            }
+
+            if (! is_array($token)) {
+                continue;
+            }
+
+            [$id, $text] = $token;
+
+            if ($id === T_EVAL) {
+                $flag('eval', "{$name} calls eval(), which runs code built at run time.", true);
+            } elseif (in_array($id, [T_INCLUDE, T_INCLUDE_ONCE, T_REQUIRE, T_REQUIRE_ONCE], true)) {
+                $target = $tokens[$i + 1] ?? null;
+                $target = $target === '(' ? ($tokens[$i + 2] ?? null) : $target;
+
+                if (is_array($target) && $target[0] === T_CONSTANT_ENCAPSED_STRING && preg_match('#^[\'"]\s*(https?:|ftps?:|php://input|data:|expect:|phar:)#i', $target[1]) === 1) {
+                    $flag('include', "{$name} loads PHP code from outside the package ({$target[1]}).", true);
+                }
+            } elseif (in_array($id, [T_STRING, T_NAME_FULLY_QUALIFIED], true) && ($tokens[$i + 1] ?? null) === '(') {
+                $previous = $tokens[$i - 1] ?? null;
+
+                // A method, static call, declaration or class name, not a call to the global function.
+                if (is_array($previous) && in_array($previous[0], [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_NEW, T_CONST], true)) {
+                    continue;
+                }
+
+                $function = strtolower(ltrim($text, '\\'));
+
+                if (isset(self::DANGEROUS_FUNCTIONS[$function])) {
+                    $flag($function, "{$name} calls {$function}(), which ".self::DANGEROUS_FUNCTIONS[$function].'.', true);
+                } elseif (isset(self::RISKY_FUNCTIONS[$function])) {
+                    $flag($function, "{$name} calls {$function}(), which ".self::RISKY_FUNCTIONS[$function].'.', false);
+                }
+            }
+        }
+
+        // $_GET['x']($_POST['y']): runs whatever function the request names.
+        if (preg_match('/\$_(GET|POST|REQUEST|COOKIE|SERVER|FILES)\s*\[[^\]]*\]\s*\(/', $php) === 1) {
+            $flag('callable-input', "{$name} calls a function named by the request, a typical backdoor.", true);
+        }
+
+        if (preg_match('/(base64_decode|str_rot13|gzinflate|gzuncompress)\s*\(\s*(base64_decode|str_rot13|gzinflate|gzuncompress|strrev)\s*\(/i', $php) === 1) {
+            $flag('decode-chain', "{$name} unpacks data through several decoders, a common way to hide malicious code.", true);
+        }
+
+        if (preg_match('/(\\\\x[0-9a-fA-F]{2}){40,}|(chr\s*\(\s*\d+\s*\)\s*\.\s*){15,}/', $php) === 1) {
+            $flag('obfuscated', "{$name} builds text from character codes, which can hide code.", false);
+        }
+
+        if (preg_match('/file_put_contents\s*\([^;]*\.php[\'"]/i', $php) === 1) {
+            $flag('writes-php', "{$name} writes .php files, which can plant code on the store.", true);
+        }
+    }
+
+    private function scriptThreats(string $name, string $script): void
+    {
+        if (preg_match('/\beval\s*\(\s*(atob|unescape|decodeURIComponent|String\.fromCharCode)\b/', $script) === 1) {
+            $this->malicious("{$name} runs decoded hidden code with eval().");
+        } elseif (preg_match('/(?<![\w.$])eval\s*\(|new\s+Function\s*\(|set(Timeout|Interval)\s*\(\s*[\'"`]/', $script) === 1) {
+            $this->suspicious("{$name} runs code built from text (eval, new Function or a string timer).");
+        }
+
+        if (preg_match('/String\.fromCharCode\s*\(\s*(\d+\s*,\s*){20,}/', $script) === 1) {
+            $this->suspicious("{$name} builds text from character codes, which can hide code.");
         }
     }
 
@@ -465,5 +652,15 @@ class CompatibilityScanner
     private function warning(string $message): void
     {
         $this->issues[] = ['level' => 'warning', 'message' => $message];
+    }
+
+    private function malicious(string $message): void
+    {
+        $this->issues[] = ['level' => 'malicious', 'message' => $message];
+    }
+
+    private function suspicious(string $message): void
+    {
+        $this->issues[] = ['level' => 'suspicious', 'message' => $message];
     }
 }

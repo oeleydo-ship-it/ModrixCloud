@@ -65,3 +65,5 @@ button.small, a.small { font-size:0.85rem; padding:0.3rem 0.7rem; }
 .compat-warn { color:#92400e; }
 .compat-fail { color:#991b1b; }
 .notice ul { margin:0.3rem 0 0; padding-left:1.2rem; }
+.compat .issue-malicious { color:#991b1b; font-weight:600; }
+.compat .issue-suspicious { color:#92400e; }

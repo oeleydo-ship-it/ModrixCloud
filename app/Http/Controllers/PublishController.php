@@ -11,6 +11,7 @@ use Marketplace\Models\Package;
 use Marketplace\Models\Submission;
 use Marketplace\Services\CompatibilityReport;
 use Marketplace\Services\CompatibilityScanner;
+use Marketplace\Services\Submissions;
 use Marketplace\Services\Uploads;
 
 /** Publishers send new packages and updates for review. */
@@ -51,7 +52,7 @@ class PublishController
         }
 
         $zip = $uploads->packageZip($request->file('package'), $data['identifier'], $data['type'], $data['version']);
-        $report = $this->scan($scanner, $uploads, $zip, $data['type'], $data['platform_version'] ?? null);
+        $report = $this->scan($scanner, $uploads, $zip, $data['type'], $data['platform_version'] ?? null, $request->user()->id, $data['identifier'], 'new', $data);
         unset($data['package']);
         $data['platform_version'] = ($data['platform_version'] ?? '') ?: $report->platformVersion;
         $data['compatibility'] = $report->toArray();
@@ -105,7 +106,7 @@ class PublishController
         }
 
         $zip = $uploads->packageZip($request->file('package'), $package->identifier, $package->type, $data['version']);
-        $report = $this->scan($scanner, $uploads, $zip, $package->type, $data['platform_version'] ?? null);
+        $report = $this->scan($scanner, $uploads, $zip, $package->type, $data['platform_version'] ?? null, $request->user()->id, $package->identifier, 'update', $data);
         unset($data['package']);
         $data['platform_version'] = ($data['platform_version'] ?? '') ?: ($report->platformVersion ?? $package->platform_version);
         $data['compatibility'] = $report->toArray();
@@ -116,14 +117,37 @@ class PublishController
     }
 
     /**
-     * Scans the stored ZIP. A package that would fail on stores is refused
-     * with every problem listed, and its file is removed.
+     * Scans the stored ZIP.
+     *
+     * Possible malicious code rejects the submission automatically. It is
+     * recorded as rejected, with the ZIP kept for the admin to inspect.
+     *
+     * A package that would only fail on stores is refused with every problem
+     * listed, and its file is removed.
+     *
+     * @param  array<string, mixed>  $data  the submitted form fields
      *
      * @throws ValidationException on `package`
      */
-    private function scan(CompatibilityScanner $scanner, Uploads $uploads, string $zip, string $type, ?string $platform): CompatibilityReport
+    private function scan(CompatibilityScanner $scanner, Uploads $uploads, string $zip, string $type, ?string $platform, int $userId, string $identifier, string $kind, array $data): CompatibilityReport
     {
         $report = $scanner->scan($uploads->path($zip), $type, $platform);
+
+        if ($report->malicious() !== []) {
+            unset($data['package']);
+            $data['compatibility'] = $report->toArray();
+
+            Submission::query()->create([
+                'user_id' => $userId, 'identifier' => $identifier, 'kind' => $kind, 'data' => $data, 'zip_path' => $zip,
+                'status' => 'rejected', 'reviewed_at' => now(),
+                'review_note' => Submissions::securityNote($report),
+            ]);
+
+            throw ValidationException::withMessages(['package' => [
+                'Your package was rejected automatically: the security scan found possible malicious code.',
+                ...array_map(fn (string $message) => 'Security: '.$message, $report->malicious()),
+            ]]);
+        }
 
         if (! $report->passed()) {
             @unlink($uploads->path($zip));

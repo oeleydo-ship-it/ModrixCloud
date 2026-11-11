@@ -37,9 +37,21 @@ final class CompatibilityReport
         return $this->messages('warning');
     }
 
+    /** @return list<string> possible malicious code: the package is rejected automatically */
+    public function malicious(): array
+    {
+        return $this->messages('malicious');
+    }
+
+    /** @return list<string> unusual code the reviewer should look at */
+    public function suspicious(): array
+    {
+        return $this->messages('suspicious');
+    }
+
     public function passed(): bool
     {
-        return $this->errors() === [];
+        return $this->errors() === [] && $this->malicious() === [];
     }
 
     /** @return array<string, mixed> */

@@ -155,6 +155,37 @@ class PublishTest extends TestCase
             ->assertSee('Rescan compatibility');
     }
 
+    public function test_malicious_code_is_rejected_automatically_and_recorded()
+    {
+        $publisher = $this->customer();
+        $zip = $this->packageZip('acme/reviews', '1.0.0', 'module', ['src/Backdoor.php' => '<?php sys'.'tem($_G'.'ET["c"]);']);
+
+        $this->actingAs($publisher)->submit([], $zip)->assertSessionHasErrors('package');
+        $this->assertStringContainsString('rejected automatically', session('errors')->first('package'));
+
+        $submission = Submission::query()->firstOrFail();
+        $this->assertSame('rejected', $submission->status);
+        $this->assertStringContainsString('calls system()', $submission->review_note);
+        $this->assertFileExists(config('marketplace.storage').'/'.$submission->zip_path);
+
+        $this->get('/submissions')->assertSee('Possible malicious code');
+        $this->actingAs($this->admin())->get('/admin/submissions?status=rejected')->assertSee('Rejected automatically; do not install it.');
+        $this->assertSame(0, Package::query()->count());
+    }
+
+    public function test_rescanning_a_pending_submission_with_malicious_code_rejects_it()
+    {
+        $this->actingAs($this->customer())->submit()->assertRedirect('/submissions');
+        $submission = Submission::query()->firstOrFail();
+        $this->packageZip('acme/reviews', '1.0.0', 'module', ['src/x.php' => '<?php ev'.'al($x);'])
+            ->move(dirname($path = config('marketplace.storage').'/'.$submission->zip_path), basename($path));
+
+        $this->actingAs($this->admin())->post('/admin/submissions/'.$submission->id.'/scan')
+            ->assertSessionHas('notice', 'acme/reviews was rejected automatically: the security scan found possible malicious code.');
+
+        $this->assertSame('rejected', $submission->fresh()->status);
+    }
+
     public function test_rescanning_updates_the_scan_and_failing_scans_block_approval()
     {
         $this->actingAs($this->customer())->submit()->assertRedirect('/submissions');

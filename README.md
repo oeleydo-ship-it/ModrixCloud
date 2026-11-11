@@ -60,6 +60,22 @@ Every submission is scanned for compatibility (`CompatibilityScanner`). The scan
 
 A package that would fail on stores is refused, and every reason is listed. One example is a block in `checkout.after_shipping` while declaring `^1.0`, because that place needs core 1.0.0-rc.3. Otherwise the scan, including the minimum core and the first published core it runs on, is shown to the publisher and to the reviewer. The reviewer can rescan, and a failing scan blocks approval. When a core release adds a place, slot, capability or manifest key, add it with its version to `config/compatibility.php`.
 
+The same scan looks for malicious code. Files are read as text and PHP is tokenised, never run. These are **rejected automatically**:
+
+- shell commands (`exec`, `shell_exec`, `system`, `passthru`, `proc_open`, `popen`, backticks), `eval`, `create_function` and `dl`;
+- PHP loaded from URLs;
+- functions named by request input;
+- stacked decoders, and code that writes `.php` files;
+- known web-shell and crypto-miner names;
+- PHP hidden in images or other files;
+- server scripts, `.htaccess` and other server config, and executables;
+- SVGs with scripts;
+- JavaScript that runs decoded hidden code.
+
+The submission is recorded as rejected, with the findings as the note. The ZIP is kept for inspection, and a rescan that finds such code also rejects a pending submission.
+
+Code that is risky but sometimes legitimate is only flagged for the reviewer. That includes raw sockets, `gzinflate`/`str_rot13`, `putenv`, `eval`/`new Function` in JavaScript, very long encoded strings and files over 2 MB.
+
 **Admin** (`/admin`): overview, repository (edit listings, thumbnails, prices,
 status, categories and releases), submissions, updates, categories, pricing,
 licenses (search, disconnect, revoke), orders, and settings (name, currency,
