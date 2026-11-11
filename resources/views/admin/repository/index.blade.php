@@ -5,6 +5,22 @@
         <h1>Repository</h1>
         <a class="button" href="{{ url('/admin/repository/new') }}">Add a package</a>
     </div>
+    @if ($bundled['total'] > 0)
+        <form method="post" action="{{ url('/admin/repository/bundled') }}" class="inline-form">
+            @csrf
+            <p class="meta">
+                {{ $bundled['total'] }} modules and themes ship with this marketplace.
+                @if ($bundled['missing'] === [])
+                    All of them are published.
+                @else
+                    {{ count($bundled['missing']) }} are not published yet: {{ implode(', ', array_slice($bundled['missing'], 0, 8)) }}{{ count($bundled['missing']) > 8 ? ', …' : '' }}.
+                @endif
+            </p>
+            @if ($bundled['missing'] !== [])
+                <button type="submit">Publish bundled packages</button>
+            @endif
+        </form>
+    @endif
     <form method="get" class="inline-form">
         <label class="sr-only" for="repo-q">Search</label>
         <input id="repo-q" name="q" value="{{ $q }}" placeholder="Search name or identifier">

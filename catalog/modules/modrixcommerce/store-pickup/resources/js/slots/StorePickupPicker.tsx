@@ -161,6 +161,29 @@ export default function StorePickupPicker({
 
     // Dynamically synchronize the Cash on Delivery / Pay in store payment option in checkout
     useEffect(() => {
+        // Write only when the text differs: every DOM write counts as a change for the observer below.
+        const setText = (el: HTMLElement, text: string) => {
+            if (el.textContent !== text) {
+                el.textContent = text;
+            }
+        };
+        const setLabel = (span: HTMLElement, text: string) => {
+            const radioInput = span.querySelector('input');
+            const current = Array.from(span.childNodes)
+                .filter((n) => n !== radioInput)
+                .map((n) => n.textContent ?? '')
+                .join('')
+                .trim();
+            if (current === text) {
+                return;
+            }
+            span.innerHTML = '';
+            if (radioInput) {
+                span.appendChild(radioInput);
+            }
+            span.appendChild(document.createTextNode(` ${text}`));
+        };
+
         const syncPaymentOption = () => {
             const codRadio = document.querySelector<HTMLInputElement>(
                 'input[name="payment_method"][value="cash_on_delivery"]',
@@ -219,19 +242,14 @@ export default function StorePickupPicker({
                 } else if (cod_behavior === 'pay_in_store') {
                     card.style.display = '';
                     if (labelSpan) {
-                        const radioInput = labelSpan.querySelector('input');
-                        labelSpan.innerHTML = '';
-                        if (radioInput) {
-                            labelSpan.appendChild(radioInput);
-                        }
-                        labelSpan.appendChild(
-                            document.createTextNode(` ${pay_in_store_label || 'Pay in store'}`),
-                        );
+                        setLabel(labelSpan, pay_in_store_label || 'Pay in store');
                     }
                     if (instructionsSpan) {
-                        instructionsSpan.textContent =
+                        setText(
+                            instructionsSpan,
                             pay_in_store_instructions ||
-                            'Pay in store (cash or card) when you collect your order.';
+                                'Pay in store (cash or card) when you collect your order.',
+                        );
                     }
                     if (feeP) {
                         feeP.style.display = 'none';
@@ -241,21 +259,14 @@ export default function StorePickupPicker({
                 // Standard delivery: restore Cash on Delivery with courier fee
                 card.style.display = '';
                 if (labelSpan) {
-                    const radioInput = labelSpan.querySelector('input');
-                    labelSpan.innerHTML = '';
-                    if (radioInput) {
-                        labelSpan.appendChild(radioInput);
-                    }
-                    labelSpan.appendChild(
-                        document.createTextNode(
-                            ` ${card.dataset.origCodLabel || 'Cash on delivery'}`,
-                        ),
-                    );
+                    setLabel(labelSpan, card.dataset.origCodLabel || 'Cash on delivery');
                 }
                 if (instructionsSpan) {
-                    instructionsSpan.textContent =
+                    setText(
+                        instructionsSpan,
                         card.dataset.origCodInstructions ||
-                        'Pay the courier in cash when your order arrives.';
+                            'Pay the courier in cash when your order arrives.',
+                    );
                 }
                 if (feeP) {
                     feeP.style.display = '';
@@ -276,19 +287,27 @@ export default function StorePickupPicker({
             });
         };
 
-        syncPaymentOption();
-
-        // Observe the checkout payment section in case Inertia re-renders payment methods
+        // Observe the checkout payment section in case Inertia re-renders payment methods.
+        // The observer is paused while syncing, so its own writes can't re-trigger it
+        // (that loop froze the checkout with "Page not responding").
         const paymentSection =
             document.querySelector('section[aria-labelledby="payment-heading"]') ||
             document.getElementById('payment-heading')?.closest('section');
         let observer: MutationObserver | null = null;
-        if (paymentSection) {
-            observer = new MutationObserver(() => {
+        const run = () => {
+            observer?.disconnect();
+            try {
                 syncPaymentOption();
-            });
-            observer.observe(paymentSection, { childList: true, subtree: true });
+            } finally {
+                if (observer && paymentSection) {
+                    observer.observe(paymentSection, { childList: true, subtree: true });
+                }
+            }
+        };
+        if (paymentSection) {
+            observer = new MutationObserver(run);
         }
+        run();
 
         return () => {
             if (observer) {

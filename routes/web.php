@@ -85,6 +85,7 @@ Route::prefix('admin')->group(function () {
         Route::get('repository', [RepositoryController::class, 'index'])->name('admin.repository');
         Route::get('repository/new', [RepositoryController::class, 'create']);
         Route::post('repository/new', [RepositoryController::class, 'store']);
+        Route::post('repository/bundled', [RepositoryController::class, 'publishBundled']);
         Route::get('repository/{slug}', [RepositoryController::class, 'edit']);
         Route::post('repository/{slug}', [RepositoryController::class, 'update']);
         Route::get('updates', [RepositoryController::class, 'updates'])->name('admin.updates');

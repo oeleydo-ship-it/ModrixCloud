@@ -46,6 +46,7 @@ class Uploads
             }
 
             $bytes = 0;
+            $names = [];
 
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $entry = $zip->statIndex($i);
@@ -57,19 +58,27 @@ class Uploads
                 if ($symlink || str_starts_with($name, '/') || preg_match('#(^|/)\.\.(/|$)|^[a-zA-Z]:#', $name) === 1 || $bytes > self::MAX_UNPACKED_BYTES) {
                     $fail('The package contains unsafe paths or is larger than 100 MB unpacked.');
                 }
+
+                $names[$i] = $name;
             }
 
             $manifestName = $type === 'theme' ? 'theme.json' : 'module.json';
-            $stat = $zip->statName($manifestName);
+            $prefix = $this->rootFolder($names, $manifestName);
+            $index = $prefix === null ? false : array_search($prefix.$manifestName, $names, true);
+            $stat = $index === false ? false : $zip->statIndex($index);
 
             if ($stat === false || $stat['size'] > 65536) {
-                $fail("Include {$manifestName} at the ZIP root (up to 64 KB).");
+                $fail("Include {$manifestName} at the ZIP root or inside a single top folder (up to 64 KB).");
             }
 
-            $manifest = json_decode((string) $zip->getFromName($manifestName), true);
+            $manifest = json_decode((string) $zip->getFromIndex($index), true);
 
             if (! is_array($manifest) || ($manifest['name'] ?? null) !== $identifier || ($manifest['version'] ?? null) !== $version) {
                 $fail('The ZIP manifest package identifier and version must match the listing.');
+            }
+
+            if ($prefix !== '') {
+                return $this->storeUnwrapped($zip, $names, $prefix);
             }
         } finally {
             $zip->close();
@@ -93,6 +102,71 @@ class Uploads
         }
 
         return $this->store($file, $folder, $types[$info['mime']]);
+    }
+
+    /**
+     * '' when the manifest is at the ZIP root, 'folder/' when every file sits in
+     * one top folder holding the manifest (a zipped package folder), else null.
+     * macOS metadata (__MACOSX/) is ignored.
+     *
+     * @param  array<int, string>  $names
+     */
+    private function rootFolder(array $names, string $manifestName): ?string
+    {
+        if (in_array($manifestName, $names, true)) {
+            return '';
+        }
+
+        $folders = [];
+
+        foreach ($names as $name) {
+            if (str_starts_with($name, '__MACOSX/')) {
+                continue;
+            }
+
+            if (! str_contains($name, '/')) {
+                return null;
+            }
+
+            $folders[strstr($name, '/', true)] = true;
+        }
+
+        if (count($folders) !== 1) {
+            return null;
+        }
+
+        $prefix = array_key_first($folders).'/';
+
+        return in_array($prefix.$manifestName, $names, true) ? $prefix : null;
+    }
+
+    /**
+     * Rewrites a ZIP whose files sit in one top folder so the manifest is at
+     * the root, as stores expect, and stores the result.
+     *
+     * @param  array<int, string>  $names
+     */
+    private function storeUnwrapped(ZipArchive $source, array $names, string $prefix): string
+    {
+        $relative = 'packages/'.Str::random(32).'.zip';
+        $target = $this->path($relative);
+        File::ensureDirectoryExists(dirname($target));
+        $zip = new ZipArchive;
+        $zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+        foreach ($names as $i => $name) {
+            $inner = substr($name, strlen($prefix));
+
+            if (! str_starts_with($name, $prefix) || $inner === '' || str_ends_with($name, '/')) {
+                continue;
+            }
+
+            $zip->addFromString($inner, (string) $source->getFromIndex($i));
+        }
+
+        $zip->close();
+
+        return $relative;
     }
 
     /** Absolute path of a stored private file. */

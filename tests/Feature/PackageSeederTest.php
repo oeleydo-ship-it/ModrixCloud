@@ -6,6 +6,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Marketplace\Models\Package;
+use Marketplace\Models\User;
 use Tests\TestCase;
 
 /** `marketplace:publish --all` and the seeder publish every package in the source tree. */
@@ -50,6 +51,20 @@ class PackageSeederTest extends TestCase
         $this->assertSame('1.0.0', $razorpay->latestRelease()?->version);
         $this->assertSame(['payments'], $razorpay->categories()->pluck('slug')->all());
         $this->assertNotEmpty($razorpay->features);
+    }
+
+    public function test_admins_publish_bundled_packages_from_the_repository_page()
+    {
+        $admin = User::query()->create(['name' => 'Admin', 'email' => 'admin@example.com', 'password' => 'secret-password-1']);
+        $admin->forceFill(['is_admin' => true])->save();
+        $this->actingAs($admin);
+
+        $this->get('/admin/repository')->assertOk()->assertSee('2 are not published yet')->assertSee('Publish bundled packages');
+
+        $this->post('/admin/repository/bundled')->assertRedirect('/admin/repository');
+
+        $this->assertSame(2, Package::query()->count());
+        $this->get('/admin/repository')->assertSee('All of them are published.')->assertDontSee('Publish bundled packages');
     }
 
     public function test_bundled_catalog_manifests_are_publishable()

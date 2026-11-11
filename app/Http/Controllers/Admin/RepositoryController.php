@@ -2,8 +2,10 @@
 
 namespace Marketplace\Http\Controllers\Admin;
 
+use Database\Seeders\PackageSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Marketplace\Http\Controllers\PublishController;
@@ -39,10 +41,61 @@ class RepositoryController
 
         return view('admin.repository.index', [
             'q' => $q,
+            'bundled' => $this->bundledStatus(),
             'packages' => Package::query()
                 ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w->where('name', 'like', "%{$q}%")->orWhere('identifier', 'like', "%{$q}%")))
                 ->orderBy('name')->paginate(50)->withQueryString(),
         ]);
+    }
+
+    /**
+     * Publishes every module and theme bundled with the app (catalog/ or
+     * CATALOG_ROOT) that is not released yet, then applies listings/. The
+     * same as `php artisan db:seed --class=PackageSeeder` on the server.
+     */
+    public function publishBundled(): RedirectResponse
+    {
+        $before = PackageRelease::query()->count();
+        Artisan::call('db:seed', ['--class' => PackageSeeder::class, '--force' => true]);
+        $added = PackageRelease::query()->count() - $before;
+        $missing = $this->bundledStatus()['missing'];
+
+        return redirect('/admin/repository')->with('notice', $missing === []
+            ? "Bundled packages are up to date ({$added} new releases published)."
+            : "{$added} new releases published; ".count($missing).' could not be published: '.implode(', ', $missing).'. See the log for details.');
+    }
+
+    /**
+     * Bundled packages and the ones whose bundled version is not released yet.
+     *
+     * @return array{total: int, missing: list<string>}
+     */
+    private function bundledStatus(): array
+    {
+        $root = rtrim((string) config('marketplace.source_root'), '/\\');
+        $wanted = [];
+
+        foreach (['module' => 'modules', 'theme' => 'themes'] as $type => $folder) {
+            foreach (glob($root.'/'.$folder.'/*/*/'.$type.'.json') ?: [] as $file) {
+                $manifest = json_decode((string) file_get_contents($file), true);
+
+                if (is_array($manifest) && is_string($manifest['name'] ?? null)) {
+                    $wanted[$manifest['name']] = (string) ($manifest['version'] ?? '');
+                }
+            }
+        }
+
+        $released = PackageRelease::query()
+            ->join('packages', 'packages.id', '=', 'package_releases.package_id')
+            ->whereIn('packages.identifier', array_keys($wanted))
+            ->get(['packages.identifier', 'package_releases.version'])
+            ->map(fn ($r) => $r->identifier.'@'.$r->version)
+            ->flip();
+
+        $missing = array_keys(array_filter($wanted, fn ($version, $identifier) => ! isset($released[$identifier.'@'.$version]), ARRAY_FILTER_USE_BOTH));
+        sort($missing);
+
+        return ['total' => count($wanted), 'missing' => $missing];
     }
 
     public function create(): View
