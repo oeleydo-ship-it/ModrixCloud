@@ -35,6 +35,11 @@ class Submissions
 
             $data = $submission->data;
             $zip = $this->uploads->path((string) $submission->zip_path);
+            $scan = CompatibilityReport::fromArray($data['compatibility'] ?? null);
+
+            if ($scan !== null && ! $scan->passed()) {
+                $fail('The compatibility scan found problems that would stop stores from installing this package. Reject it with the scan notes.');
+            }
 
             if ($submission->kind === 'update') {
                 $package = Package::query()->where('identifier', $submission->identifier)->lockForUpdate()->firstOrFail();

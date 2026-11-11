@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Marketplace\Models\Package;
 use Marketplace\Models\Submission;
+use Marketplace\Services\CompatibilityReport;
+use Marketplace\Services\CompatibilityScanner;
 use Marketplace\Services\Uploads;
 
 /** Publishers send new packages and updates for review. */
@@ -23,14 +25,14 @@ class PublishController
         return view('publish.create');
     }
 
-    public function store(Request $request, Uploads $uploads): RedirectResponse
+    public function store(Request $request, Uploads $uploads, CompatibilityScanner $scanner): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:160'],
             'identifier' => ['required', 'string', 'max:128', 'regex:'.self::IDENTIFIER, 'unique:packages,identifier'],
             'type' => ['required', 'in:theme,module'],
             'version' => ['required', 'string', 'max:32', 'regex:'.self::VERSION],
-            'platform_version' => ['required', 'string', 'max:64'],
+            'platform_version' => ['nullable', 'string', 'max:64'],
             'author' => ['required', 'string', 'max:120'],
             'license_name' => ['required', 'string', 'max:64'],
             'summary' => ['required', 'string', 'max:255'],
@@ -49,7 +51,10 @@ class PublishController
         }
 
         $zip = $uploads->packageZip($request->file('package'), $data['identifier'], $data['type'], $data['version']);
+        $report = $this->scan($scanner, $uploads, $zip, $data['type'], $data['platform_version'] ?? null);
         unset($data['package']);
+        $data['platform_version'] = ($data['platform_version'] ?? '') ?: $report->platformVersion;
+        $data['compatibility'] = $report->toArray();
 
         Submission::query()->create(['user_id' => $request->user()->id, 'identifier' => $data['identifier'], 'kind' => 'new', 'data' => $data, 'zip_path' => $zip]);
 
@@ -68,7 +73,7 @@ class PublishController
         return view('publish.update', ['packages' => $packages]);
     }
 
-    public function update(Request $request, Uploads $uploads): RedirectResponse
+    public function update(Request $request, Uploads $uploads, CompatibilityScanner $scanner): RedirectResponse
     {
         $data = $request->validate([
             'identifier' => ['required', 'string', 'max:128'],
@@ -100,12 +105,36 @@ class PublishController
         }
 
         $zip = $uploads->packageZip($request->file('package'), $package->identifier, $package->type, $data['version']);
+        $report = $this->scan($scanner, $uploads, $zip, $package->type, $data['platform_version'] ?? null);
         unset($data['package']);
-        $data['platform_version'] = ($data['platform_version'] ?? '') ?: $package->platform_version;
+        $data['platform_version'] = ($data['platform_version'] ?? '') ?: ($report->platformVersion ?? $package->platform_version);
+        $data['compatibility'] = $report->toArray();
 
         Submission::query()->create(['user_id' => $request->user()->id, 'identifier' => $package->identifier, 'kind' => 'update', 'data' => $data, 'zip_path' => $zip]);
 
         return redirect('/submissions')->with('notice', 'Thanks! Your update is waiting for review.');
+    }
+
+    /**
+     * Scans the stored ZIP. A package that would fail on stores is refused
+     * with every problem listed, and its file is removed.
+     *
+     * @throws ValidationException on `package`
+     */
+    private function scan(CompatibilityScanner $scanner, Uploads $uploads, string $zip, string $type, ?string $platform): CompatibilityReport
+    {
+        $report = $scanner->scan($uploads->path($zip), $type, $platform);
+
+        if (! $report->passed()) {
+            @unlink($uploads->path($zip));
+
+            throw ValidationException::withMessages(['package' => array_map(
+                fn (string $message) => 'Compatibility: '.$message,
+                $report->errors(),
+            )]);
+        }
+
+        return $report;
     }
 
     public function index(Request $request): View

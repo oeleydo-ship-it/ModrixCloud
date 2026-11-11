@@ -45,7 +45,8 @@ trait Fixtures
         $path = tempnam(sys_get_temp_dir(), 'zip').'.zip';
         $zip = new ZipArchive;
         $zip->open($path, ZipArchive::CREATE);
-        $zip->addFromString($type === 'theme' ? 'theme.json' : 'module.json', json_encode(['name' => $identifier, 'version' => $version]));
+        $manifest = ['name' => $identifier, 'display_name' => 'Test package', 'version' => $version, 'type' => $type, 'platform_version' => '^1.0'];
+        $zip->addFromString($type === 'theme' ? 'theme.json' : 'module.json', json_encode($type === 'theme' ? $manifest + ['theme_type' => 'storefront'] : $manifest));
 
         foreach ($extra as $name => $contents) {
             $zip->addFromString($name, $contents);

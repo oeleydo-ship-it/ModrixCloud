@@ -56,3 +56,12 @@ button.small, a.small { font-size:0.85rem; padding:0.3rem 0.7rem; }
 .status-disconnected { background:#f1f5f9; color:#475569; }
 .actions form { display:inline-flex; gap:0.3rem; align-items:center; margin:0 0.2rem 0.2rem 0; }
 .actions input.small { width:9rem; font-size:0.85rem; padding:0.3rem 0.5rem; }
+.compat { border:1px solid var(--line); border-radius:12px; padding:0.6rem 0.8rem; margin:0.6rem 0; font-size:0.9rem; }
+.compat h3 { font-size:0.95rem; margin:0 0 0.3rem; }
+.compat ul { margin:0.3rem 0 0; padding-left:1.2rem; }
+.compat .issue-error { color:#991b1b; }
+.compat .issue-warning { color:#92400e; }
+.compat-ok { color:#166534; }
+.compat-warn { color:#92400e; }
+.compat-fail { color:#991b1b; }
+.notice ul { margin:0.3rem 0 0; padding-left:1.2rem; }

@@ -6,7 +6,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Marketplace\Models\Package;
 use Marketplace\Models\Submission;
+use Marketplace\Services\CompatibilityScanner;
 use Marketplace\Services\Submissions;
 use Marketplace\Services\Uploads;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -45,6 +47,25 @@ class SubmissionController
             $submissions->reject($submission, $request->user(), (string) $data['review_note']);
             $notice = 'Submission rejected; the publisher can see your note.';
         }
+
+        return redirect('/admin/submissions')->with('notice', $notice);
+    }
+
+    /** Scans the submitted ZIP again, e.g. after a core release was published. */
+    public function scan(Submission $submission, Uploads $uploads, CompatibilityScanner $scanner): RedirectResponse
+    {
+        $file = $submission->zip_path ? $uploads->path($submission->zip_path) : null;
+        abort_unless($submission->status === 'pending' && $file !== null && is_file($file), 404);
+
+        $data = $submission->data;
+        $type = $data['type'] ?? Package::query()->where('identifier', $submission->identifier)->value('type') ?? 'module';
+        $report = $scanner->scan($file, $type, $data['platform_version'] ?? null);
+        $data['compatibility'] = $report->toArray();
+        $submission->forceFill(['data' => $data])->save();
+
+        $notice = $report->passed()
+            ? $submission->identifier.' passed the compatibility scan.'
+            : $submission->identifier.' has '.count($report->errors()).' compatibility problem(s); see the scan below.';
 
         return redirect('/admin/submissions')->with('notice', $notice);
     }

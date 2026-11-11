@@ -54,7 +54,11 @@
         <p class="notice">{{ session('notice') }}</p>
     @endif
     @if ($errors->any())
-        <p class="notice" role="alert">{{ $errors->first() }}</p>
+        @if (count($errors->all()) > 1)
+            <div class="notice" role="alert"><ul>@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul></div>
+        @else
+            <p class="notice" role="alert">{{ $errors->first() }}</p>
+        @endif
     @endif
     @yield('content')
 </main>

@@ -99,6 +99,7 @@ Route::prefix('admin')->group(function () {
         Route::get('submissions', [SubmissionController::class, 'index'])->name('admin.submissions');
         Route::post('submissions', [SubmissionController::class, 'review']);
         Route::get('submissions/{submission}/download', [SubmissionController::class, 'download']);
+        Route::post('submissions/{submission}/scan', [SubmissionController::class, 'scan']);
 
         Route::get('categories', [CategoryController::class, 'index'])->name('admin.categories');
         Route::post('categories', [CategoryController::class, 'save']);

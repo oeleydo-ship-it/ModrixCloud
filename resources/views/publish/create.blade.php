@@ -5,6 +5,7 @@
         <span class="eyebrow">PUBLISHERS</span>
         <h1>Submit a package</h1>
         <p class="meta">Upload a ZIP with <code>module.json</code> (extension) or <code>theme.json</code> (theme) at its root. Its <code>name</code> and <code>version</code> must match the fields below. An admin reviews every submission before it is listed.</p>
+        <p class="meta">Every package is scanned for compatibility with Modrix Commerce stores when you submit. The scan checks manifest keys and capabilities, the files the manifest points to, the storefront places and slots the code uses, and <code>platform_version</code>. If the package uses a feature from a newer core, set <code>platform_version</code> to that core or later, for example <code>^1.0.0-rc.3</code>.</p>
         <form method="post" action="{{ url('/submit') }}" enctype="multipart/form-data" class="form-grid">
             @csrf
             <label>Name <input name="name" value="{{ old('name') }}" required maxlength="160"></label>
@@ -16,7 +17,7 @@
                 </select>
             </label>
             <label>Version <input name="version" value="{{ old('version', '1.0.0') }}" required></label>
-            <label>Platform version <input name="platform_version" value="{{ old('platform_version', '^1.0') }}" required></label>
+            <label>Platform version (optional) <input name="platform_version" value="{{ old('platform_version') }}" placeholder="Read from the manifest"></label>
             <label>Author <input name="author" value="{{ old('author', auth()->user()->name) }}" required maxlength="120"></label>
             <label>License <input name="license_name" value="{{ old('license_name', 'MIT') }}" required maxlength="64"></label>
             <label class="wide">Summary <textarea name="summary" required maxlength="255" rows="3">{{ old('summary') }}</textarea></label>

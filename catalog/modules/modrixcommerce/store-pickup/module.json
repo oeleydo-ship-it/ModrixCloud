@@ -7,7 +7,7 @@
     "type": "module",
     "icon": "map-pin",
     "accent": "#0ea5e9",
-    "platform_version": "^1.0",
+    "platform_version": "^1.0.0-rc.3",
     "author": "Modrix team",
     "license": "MIT",
     "autoload": {

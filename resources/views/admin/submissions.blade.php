@@ -29,7 +29,13 @@
                 @endif
                 <div><dt>Platform</dt><dd>{{ $d['platform_version'] ?? '' }}</dd></div>
             </dl>
-            <p><a href="{{ url('/admin/submissions/'.$submission->id.'/download') }}">Download the ZIP to inspect ↓</a></p>
+            @include('partials.compatibility', ['report' => \Marketplace\Services\CompatibilityReport::fromArray($d['compatibility'] ?? null)])
+            <p class="actions">
+                <a href="{{ url('/admin/submissions/'.$submission->id.'/download') }}">Download the ZIP to inspect ↓</a>
+                @if ($submission->status === 'pending')
+                    <form method="post" action="{{ url('/admin/submissions/'.$submission->id.'/scan') }}">@csrf<button type="submit" class="secondary">Rescan compatibility</button></form>
+                @endif
+            </p>
             @if ($submission->status === 'pending')
                 <form method="post" action="{{ url('/admin/submissions') }}" class="stack">
                     @csrf

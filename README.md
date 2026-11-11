@@ -50,6 +50,16 @@ Refunds revoke the license.
 `module.json` or `theme.json` at its root; name and version must match the
 form. An admin approves or rejects each submission with a note.
 
+Every submission is scanned for compatibility (`CompatibilityScanner`). The scan checks:
+
+- manifest keys and capabilities;
+- the files the manifest points to;
+- the storefront places and slots the module's PHP registers;
+- required packages;
+- `platform_version`, against the oldest core that has every feature the package uses.
+
+A package that would fail on stores is refused, and every reason is listed. One example is a block in `checkout.after_shipping` while declaring `^1.0`, because that place needs core 1.0.0-rc.3. Otherwise the scan, including the minimum core and the first published core it runs on, is shown to the publisher and to the reviewer. The reviewer can rescan, and a failing scan blocks approval. When a core release adds a place, slot, capability or manifest key, add it with its version to `config/compatibility.php`.
+
 **Admin** (`/admin`): overview, repository (edit listings, thumbnails, prices,
 status, categories and releases), submissions, updates, categories, pricing,
 licenses (search, disconnect, revoke), orders, and settings (name, currency,

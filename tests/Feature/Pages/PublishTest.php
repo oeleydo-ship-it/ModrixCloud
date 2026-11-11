@@ -112,4 +112,63 @@ class PublishTest extends TestCase
         $this->assertSame('1.1.0', $package->fresh()->latestRelease()?->version);
         $this->assertSame('Faster', $package->fresh()->changelog);
     }
+
+    /** A module ZIP whose code puts a block in a place added by core 1.0.0-rc.3. */
+    private function newerCoreZip(string $platform, string $version = '1.0.0'): UploadedFile
+    {
+        $provider = "<?php \$slots->block('acme/reviews', 'k', 'Label', 'Picker', ['checkout.after_shipping'], 'checkout.after_shipping', fn () => []);";
+
+        $zip = $this->packageZip('acme/reviews', $version, 'module', ['src/Provider.php' => $provider]);
+        $archive = new \ZipArchive;
+        $archive->open($zip->getRealPath());
+        $archive->addFromString('module.json', json_encode(['name' => 'acme/reviews', 'display_name' => 'Reviews', 'version' => $version, 'type' => 'module', 'platform_version' => $platform]));
+        $archive->close();
+
+        return $zip;
+    }
+
+    public function test_a_package_that_would_break_stores_is_refused_with_the_reasons()
+    {
+        $this->actingAs($this->customer());
+
+        $this->submit(['platform_version' => ''], $this->newerCoreZip('^1.0'))
+            ->assertSessionHasErrors('package');
+
+        $this->assertStringContainsString('Set platform_version to "^1.0.0-rc.3"', session('errors')->first('package'));
+        $this->assertSame(0, Submission::query()->count());
+        $this->assertSame([], glob(config('marketplace.storage').'/packages/*') ?: []);
+    }
+
+    public function test_a_compatible_package_keeps_its_scan_for_the_reviewer()
+    {
+        $this->actingAs($this->customer())->submit(['platform_version' => ''], $this->newerCoreZip('^1.0.0-rc.3'))->assertRedirect('/submissions');
+
+        $submission = Submission::query()->firstOrFail();
+        $this->assertSame('^1.0.0-rc.3', $submission->data['platform_version']);
+        $this->assertSame('1.0.0-rc.3', $submission->data['compatibility']['minimum_core']);
+
+        $this->get('/submissions')->assertSee('Compatible')->assertSee('Needs core 1.0.0-rc.3+');
+        $this->actingAs($this->admin())->get('/admin/submissions')
+            ->assertSee('Compatibility scan')
+            ->assertSee('1.0.0-rc.3 or later')
+            ->assertSee('place &quot;checkout.after_shipping&quot;', false)
+            ->assertSee('Rescan compatibility');
+    }
+
+    public function test_rescanning_updates_the_scan_and_failing_scans_block_approval()
+    {
+        $this->actingAs($this->customer())->submit()->assertRedirect('/submissions');
+        $submission = Submission::query()->firstOrFail();
+        $admin = $this->admin();
+
+        // Simulate a submission from before the rules changed: the stored ZIP now fails.
+        $this->newerCoreZip('^1.0')->move(dirname($path = config('marketplace.storage').'/'.$submission->zip_path), basename($path));
+
+        $this->actingAs($admin)->post('/admin/submissions/'.$submission->id.'/scan')->assertRedirect('/admin/submissions');
+        $this->assertFalse(\Marketplace\Services\CompatibilityReport::fromArray($submission->fresh()->data['compatibility'])->passed());
+
+        $this->post('/admin/submissions', ['id' => $submission->id, 'decision' => 'approved'])->assertSessionHasErrors('id');
+        $this->assertSame('pending', $submission->fresh()->status);
+        $this->assertSame(0, Package::query()->count());
+    }
 }
