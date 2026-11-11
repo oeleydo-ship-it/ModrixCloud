@@ -71,6 +71,13 @@ class CoreReleasesTest extends TestCase
         $this->upload('1.1.0');
     }
 
+    public function test_a_tag_style_version_is_stored_without_the_v(): void
+    {
+        $r = $this->releases()->upload($this->coreZip('1.0.0-rc.2')->getRealPath(), 'v1.0.0-rc.2', null, '8.3');
+
+        $this->assertSame('1.0.0-rc.2', $r->version);
+    }
+
     public function test_upload_refuses_invalid_semver(): void
     {
         $this->expectException(CoreReleaseException::class);

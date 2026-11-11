@@ -31,7 +31,8 @@ class CoreReleases
      */
     public function upload(string $zipPath, string $version, ?string $notes, string $minPhp): CoreRelease
     {
-        $version = trim($version);
+        // "v1.0.0-rc.2" (a tag name) is stored as 1.0.0-rc.2, as the core declares it.
+        $version = preg_replace('/^[vV](?=\d)/', '', trim($version));
         $minPhp = trim($minPhp);
 
         // Strict semver: also keeps path separators and "dev-*" names out of the storage path.
@@ -44,7 +45,7 @@ class CoreReleases
         }
 
         if (! $valid) {
-            throw new CoreReleaseException('Enter a valid version such as 1.1.0.');
+            throw new CoreReleaseException('Enter a valid version such as 1.1.0 or 1.0.0-rc.2.');
         }
 
         if (preg_match('/^\d+\.\d+(\.\d+)?$/', $minPhp) !== 1) {
