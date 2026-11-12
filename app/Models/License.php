@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $user_id
  * @property int $package_id
  * @property string $key
- * @property string $type free|paid
- * @property string $status active|revoked|refunded
+ * @property string $type free|paid|subscription (paid: bought individually; subscription: through the monthly subscription)
+ * @property string $status active|revoked|refunded|expired (expired: a subscription license whose subscription ended)
  */
 class License extends Model
 {

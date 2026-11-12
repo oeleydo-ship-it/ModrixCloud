@@ -5,6 +5,7 @@ namespace Marketplace\Services;
 use Illuminate\Support\Facades\Http;
 use Marketplace\Models\Order;
 use Marketplace\Models\Setting;
+use Marketplace\Models\Subscription;
 use RuntimeException;
 
 /**
@@ -56,6 +57,93 @@ class StripeGateway
         $order->forceFill(['stripe_session' => (string) $response->json('id')])->save();
 
         return (string) $response->json('url');
+    }
+
+    /**
+     * Creates a Checkout session in subscription mode (monthly) and returns
+     * Stripe's URL. Uses the plan's Stripe Price when one is set, else a
+     * monthly price from the plan's amount and currency.
+     *
+     * @param  array{name: string, price: string, currency: string, stripe_price: string}  $plan
+     */
+    public function createSubscriptionSession(Subscription $subscription, array $plan, string $successUrl, string $cancelUrl): string
+    {
+        $subscription->loadMissing('user');
+        $id = (string) $subscription->id;
+
+        $item = $plan['stripe_price'] !== ''
+            ? ['quantity' => 1, 'price' => $plan['stripe_price']]
+            : ['quantity' => 1, 'price_data' => [
+                'currency' => strtolower($plan['currency']),
+                'unit_amount' => (int) round(((float) $plan['price']) * 100),
+                'recurring' => ['interval' => 'month'],
+                'product_data' => ['name' => $plan['name']],
+            ]];
+
+        // A returning subscriber keeps their Stripe customer (and saved cards).
+        $customer = Subscription::query()->where('user_id', $subscription->user_id)->whereNotNull('stripe_customer')->latest('id')->value('stripe_customer');
+
+        $response = $this->post('checkout/sessions', [
+            'mode' => 'subscription',
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            ...(is_string($customer) ? ['customer' => $customer] : ['customer_email' => $subscription->user->email]),
+            'client_reference_id' => 'subscription-'.$id,
+            'metadata' => ['subscription_id' => $id],
+            // Copied onto the Stripe subscription, so its events find this row
+            // even when they arrive before checkout.session.completed.
+            'subscription_data' => ['metadata' => ['subscription_id' => $id]],
+            'line_items' => [$item],
+        ]);
+
+        if (! is_string($response['url'] ?? null)) {
+            throw new RuntimeException('Stripe did not create a checkout session.');
+        }
+
+        $subscription->forceFill(['stripe_session' => (string) $response['id']])->save();
+
+        return (string) $response['url'];
+    }
+
+    /** A Stripe customer portal link (cancel, change card, invoices). */
+    public function portalUrl(string $customer, string $returnUrl): string
+    {
+        $response = $this->post('billing_portal/sessions', ['customer' => $customer, 'return_url' => $returnUrl]);
+
+        if (! is_string($response['url'] ?? null)) {
+            throw new RuntimeException('Stripe did not open the customer portal.');
+        }
+
+        return (string) $response['url'];
+    }
+
+    /**
+     * Cancels at the end of the paid period; Stripe sends
+     * customer.subscription.updated now and customer.subscription.deleted then.
+     *
+     * @return array<string, mixed> the Stripe subscription
+     */
+    public function cancelAtPeriodEnd(string $subscription): array
+    {
+        return $this->post('subscriptions/'.rawurlencode($subscription), ['cancel_at_period_end' => 'true']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function post(string $path, array $data): array
+    {
+        $response = Http::asForm()
+            ->withBasicAuth((string) Setting::get('stripe_secret', ''), '')
+            ->timeout(20)
+            ->post('https://api.stripe.com/v1/'.$path, $data);
+
+        if (! $response->successful() || ! is_array($response->json())) {
+            throw new RuntimeException('Stripe request failed: '.($response->json('error.message') ?? 'HTTP '.$response->status()));
+        }
+
+        return $response->json();
     }
 
     /**

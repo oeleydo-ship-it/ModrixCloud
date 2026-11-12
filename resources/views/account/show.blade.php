@@ -10,14 +10,55 @@
         <form method="post" action="{{ url('/account/logout') }}">@csrf<button class="secondary" type="submit">Log out</button></form>
     </div>
 
+    @if ($subscription || $plan || $pendingSubscription)
+        <section class="panel subscription-panel">
+            <h2>Monthly subscription</h2>
+            @if ($subscriptionLive)
+                <p>
+                    <span class="status status-{{ $subscription->status }}">{{ ucfirst(str_replace('_', ' ', $subscription->status)) }}</span>
+                    {{ $subscription->currency }} {{ $subscription->amount }} / month.
+                    @if ($subscription->current_period_end)
+                        {{ $subscription->cancel_at_period_end ? 'Ends on' : 'Renews on' }} {{ $subscription->current_period_end->toFormattedDateString() }}.
+                    @endif
+                </p>
+                @if ($subscription->status === 'past_due')
+                    <p class="settings-warning" role="alert">The last payment failed. Update your card in billing so your subscription keys keep working.</p>
+                @endif
+                <p class="meta">Get a key below for any of the {{ $included->count() }} {{ $included->count() === 1 ? 'package' : 'packages' }} included in your subscription. Keys from the subscription stop working when it ends; packages you bought are always yours.</p>
+                <div class="actions">
+                    <form method="post" action="{{ url('/account/subscription/portal') }}">@csrf<button class="secondary" type="submit">Manage billing</button></form>
+                    @if (! $subscription->cancel_at_period_end)
+                        <form method="post" action="{{ url('/account/subscription/cancel') }}" onsubmit="return confirm('Cancel your subscription? Keys from it keep working until the end of the paid month.')">@csrf<button class="secondary" type="submit">Cancel subscription</button></form>
+                    @endif
+                </div>
+            @elseif ($pendingSubscription)
+                <p>Thanks! We are confirming your payment with Stripe. Refresh this page in a moment to get your keys.</p>
+            @else
+                @if ($subscription)
+                    <p class="meta">Your subscription is {{ str_replace('_', ' ', $subscription->status) }}{{ $subscription->ended_at ? ' since '.$subscription->ended_at->toFormattedDateString() : '' }}. Keys from it no longer work.</p>
+                @endif
+                @if ($plan)
+                    <p>Subscribe for {{ $plan }} and get a key for every package included in the subscription.</p>
+                    <div class="actions">
+                        <form method="post" action="{{ url('/subscribe') }}">@csrf<button type="submit">Subscribe</button></form>
+                        <a class="button secondary" href="{{ url('/subscription') }}">See what is included</a>
+                    </div>
+                @endif
+                @if ($subscription?->stripe_customer)
+                    <form method="post" action="{{ url('/account/subscription/portal') }}">@csrf<button class="link-button" type="submit">Billing history</button></form>
+                @endif
+            @endif
+        </section>
+    @endif
+
     <section class="panel">
         <h2>Get a license key</h2>
-        @if ($selected && ($selected['premium'] === false || $licenses->contains('package_id', $selected['id'])))
+        @if ($selected && ($selected['premium'] === false || $licenses->contains('package_id', $selected['id']) || ($subscriptionLive && $selected['model']->inSubscription())))
             <p>Generate the key for <strong>{{ $selected['name'] }}</strong>, then add it under Admin → Modrix Cloud in your store, or connect the store to install without copying keys.</p>
         @elseif ($selected)
-            <p><strong>{{ $selected['name'] }}</strong> is a paid package. <a href="{{ url('/item/'.$selected['slug']) }}">Buy it first</a>; the key is issued with the purchase.</p>
+            <p><strong>{{ $selected['name'] }}</strong> is a paid package. <a href="{{ url('/item/'.$selected['slug']) }}">{{ $selected['in_subscription'] ? 'Buy it or subscribe' : 'Buy it first' }}</a>; the key is issued with the purchase{{ $selected['in_subscription'] ? ' or the subscription' : '' }}.</p>
         @else
-            <p class="meta">Choose a free package. Paid packages get their key when you buy them.</p>
+            <p class="meta">Choose a free package{{ $subscriptionLive ? ' or one included in your subscription' : '' }}. Paid packages get their key when you buy them.</p>
         @endif
         <form method="post" action="{{ url('/account/licenses') }}" class="inline-form">
             @csrf
@@ -26,10 +67,22 @@
                 @if ($selected)
                     <option value="{{ $selected['slug'] }}" selected>{{ $selected['name'] }}</option>
                 @endif
+                @if ($included->isNotEmpty())
+                    <optgroup label="Included in your subscription">
+                        @foreach ($included as $product)
+                            @continue($selected && $product['slug'] === $selected['slug'])
+                            <option value="{{ $product['slug'] }}">{{ $product['name'] }}</option>
+                        @endforeach
+                    </optgroup>
+                    <optgroup label="Free packages">
+                @endif
                 @foreach ($free as $product)
                     @continue($selected && $product['slug'] === $selected['slug'])
                     <option value="{{ $product['slug'] }}">{{ $product['name'] }}</option>
                 @endforeach
+                @if ($included->isNotEmpty())
+                    </optgroup>
+                @endif
             </select>
             <button type="submit">Generate license</button>
         </form>
@@ -47,9 +100,9 @@
                     @foreach ($licenses as $license)
                         @php($activation = $license->activations->first())
                         <tr>
-                            <td><a href="{{ url('/item/'.$license->package->slug) }}">{{ $license->package->name }}</a><br><span class="meta">{{ ucfirst($license->type) }}</span></td>
+                            <td><a href="{{ url('/item/'.$license->package->slug) }}">{{ $license->package->name }}</a><br><span class="meta">{{ ['paid' => 'Purchased', 'subscription' => 'Subscription', 'free' => 'Free'][$license->type] ?? ucfirst($license->type) }}</span></td>
                             <td><code class="license-key">{{ $license->key }}</code></td>
-                            <td>{{ ucfirst($license->status) }}</td>
+                            <td>{{ $license->status === 'expired' && $license->type === 'subscription' ? 'Subscription ended' : ucfirst($license->status) }}</td>
                             <td>{{ $activation ? ($activation->domain ?: $activation->instance_id) : 'Not connected' }}</td>
                             <td>
                                 @if ($activation)

@@ -9,6 +9,7 @@ use Marketplace\Models\StoreConnection;
 use Marketplace\Services\Catalog;
 use Marketplace\Services\Connections;
 use Marketplace\Services\Licensing;
+use Marketplace\Services\Subscriptions;
 
 /**
  * Connected-store API (Modrix Cloud Connector), under
@@ -95,11 +96,12 @@ class ConnectionController
 
         $user = $connection->user;
 
-        if ($product['premium'] && ! $catalog->owns($user, $product['model'])) {
-            return ApiError::response(402, 'not_owned', 'Buy this package on Modrix Cloud first; it is then ready to install here.');
-        }
+        // Paid packages: bought, or included in the customer's subscription.
+        $license = $product['premium'] ? app(Subscriptions::class)->claim($user, $product['model']) : $licensing->issue($user, $product['model'], 'free');
 
-        $license = $licensing->issue($user, $product['model'], $product['premium'] ? 'paid' : 'free');
+        if ($license === null) {
+            return ApiError::response(402, 'not_owned', 'Buy this package on Modrix Cloud first, or subscribe if it is included in the subscription; it is then ready to install here.');
+        }
 
         if ($license->status !== 'active') {
             return ApiError::response(403, 'license_inactive', 'Your license for this package was '.$license->status.'.');

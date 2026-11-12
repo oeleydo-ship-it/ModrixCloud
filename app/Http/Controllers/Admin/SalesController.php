@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Marketplace\Models\License;
 use Marketplace\Models\Order;
+use Marketplace\Models\Subscription;
 
-/** Licenses (with their connected stores) and orders. */
+/** Licenses (with their connected stores), orders and subscription sign-ups. */
 class SalesController
 {
     public function licenses(Request $request): View
@@ -18,7 +19,7 @@ class SalesController
         return view('admin.licenses', [
             'q' => $q,
             'licenses' => License::query()
-                ->with(['user', 'package', 'activations' => fn ($a) => $a->where('active', true)])
+                ->with(['user', 'package', 'activations' => fn ($a) => $a->where('active', true), 'user.subscriptions' => fn ($s) => $s->where('status', '!=', 'pending')->latest('id')])
                 ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                     ->where('key', 'like', "%{$q}%")
                     ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$q}%"))
@@ -45,6 +46,10 @@ class SalesController
 
     public function orders(): View
     {
-        return view('admin.orders', ['orders' => Order::query()->with(['user', 'package', 'license'])->latest()->paginate(50)]);
+        return view('admin.orders', [
+            'orders' => Order::query()->with(['user', 'package', 'license'])->latest()->paginate(50),
+            // Subscription sign-ups (the full list is under Subscriptions).
+            'subscriptions' => Subscription::query()->with('user')->where('status', '!=', 'pending')->latest('id')->limit(10)->get(),
+        ]);
     }
 }

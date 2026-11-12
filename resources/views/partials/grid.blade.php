@@ -13,12 +13,13 @@
                     <div class="package-topline">
                         <span class="package-kind">{{ $product['type'] === 'theme' ? 'THEME' : 'EXTENSION' }}</span>
                         @if ($product['featured'])<span class="featured-badge">Featured</span>@endif
+                        @if ($product['in_subscription'])<span class="subscription-badge">Included in subscription</span>@endif
                     </div>
                     <h3><a href="{{ url('/item/'.$product['slug']) }}">{{ $product['name'] }}</a></h3>
                     <p class="publisher-line">by {{ $product['author'] }}</p>
                     <p class="package-summary">{{ $product['summary'] }}</p>
                     @include('partials.tags', ['product' => $product])
-                    @if ($product['premium'])<p class="purchase-license-note">Purchase first to get a license key.</p>@endif
+                    @if ($product['premium'])<p class="purchase-license-note">{{ $product['in_subscription'] ? ($product['sold_individually'] ? 'Buy it or subscribe' : 'Subscribe') : 'Purchase first' }} to get a license key.</p>@endif
                     <div class="package-meta"><span>v{{ $product['version'] }}</span><span>Platform {{ $product['platform_version'] }}</span></div>
                     <div class="package-bottom"><strong>{{ $product['price_label'] }}</strong><a href="{{ url('/item/'.$product['slug']) }}">View details →</a></div>
                     @if (! empty($product['demo_url']))

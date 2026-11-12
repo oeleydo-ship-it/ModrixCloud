@@ -5,11 +5,13 @@ namespace Marketplace\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Marketplace\Models\Category;
+use Marketplace\Models\License;
 use Marketplace\Models\Package;
 use Marketplace\Models\Setting;
 use Marketplace\Services\Catalog;
 use Marketplace\Services\CoreReleases;
 use Marketplace\Services\Releases;
+use Marketplace\Services\Subscriptions;
 use Marketplace\Services\Uploads;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -18,12 +20,12 @@ class CatalogController
 {
     public function __construct(private readonly Catalog $catalog) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, Subscriptions $subscriptions): View
     {
         $filters = [
             'q' => trim((string) $request->query('q', '')),
             'type' => in_array($request->query('type'), ['theme', 'module'], true) ? (string) $request->query('type') : 'all',
-            'tier' => in_array($request->query('tier'), ['free', 'premium'], true) ? (string) $request->query('tier') : 'all',
+            'tier' => in_array($request->query('tier'), ['free', 'premium', 'subscription'], true) ? (string) $request->query('tier') : 'all',
             'category' => (string) $request->query('category', ''),
             'demo' => $request->query('demo') === '1' ? '1' : '',
             'sort' => in_array($request->query('sort'), ['featured', 'updated', 'name', 'price_asc', 'price_desc'], true) ? (string) $request->query('sort') : 'featured',
@@ -54,10 +56,12 @@ class CatalogController
             'tagline' => (string) (Setting::get('tagline') ?: 'The repository for Modrix Commerce. Choose a storefront theme or an extension, then run it on the core platform.'),
             'currency' => (string) (Setting::get('currency') ?: config('marketplace.currency')),
             'browseUrl' => $browseUrl,
+            'subscriptionOpen' => $this->catalog->subscriptionOpen(),
+            'subscriptionPrice' => $subscriptions->priceLabel(),
         ]);
     }
 
-    public function show(Request $request, string $slug, CoreReleases $cores): View
+    public function show(Request $request, string $slug, CoreReleases $cores, Subscriptions $subscriptions): View
     {
         $product = $this->catalog->find($slug) ?? abort(404);
         $related = $this->catalog->published()
@@ -69,10 +73,29 @@ class CatalogController
         return view('catalog.show', [
             'product' => $product,
             'owned' => $this->catalog->owns($request->user(), $product['model']),
+            // free | paid | subscription: how the customer's active license was obtained.
+            'ownedVia' => $request->user() === null ? null : License::query()->where('user_id', $request->user()->id)->where('package_id', $product['id'])->where('status', 'active')->value('type'),
+            // The customer's subscription covers this package: they can get the key now.
+            'covered' => $subscriptions->covers($request->user(), $product['model']),
+            'plan' => $subscriptions->available() ? $subscriptions->priceLabel() : null,
             'related' => $related,
             // The core this version needs, the first published core that meets it and the newest core.
             'core' => $cores->requirement((string) $product['platform_version'], null),
             'currency' => (string) (Setting::get('currency') ?: config('marketplace.currency')),
+        ]);
+    }
+
+    /** The monthly subscription: price and every package it includes. */
+    public function subscription(Request $request, Subscriptions $subscriptions): View
+    {
+        $plan = $subscriptions->plan();
+
+        return view('catalog.subscription', [
+            'plan' => $plan,
+            'available' => $subscriptions->available(),
+            'priceLabel' => $subscriptions->priceLabel(),
+            'current' => $subscriptions->current($request->user()),
+            'included' => $this->catalog->published()->filter(fn ($p) => $p['model']->inSubscription())->sortBy('name')->values(),
         ]);
     }
 

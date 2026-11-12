@@ -37,6 +37,14 @@
             </select>
         </label>
         <label>Price ({{ app(\Marketplace\Services\Catalog::class)->currency() }}) <input name="price" type="number" min="0" step="0.01" value="{{ old('price', $package->price ?? '0') }}"></label>
+        <label>Paid packages are
+            <select name="sale">
+                @foreach (['individual' => 'Sold individually', 'subscription' => 'Included in the subscription only', 'both' => 'Sold individually and included in the subscription'] as $value => $label)
+                    <option value="{{ $value }}" @selected(old('sale', $package->saleMode()) === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </label>
+        <p class="wide meta">Free packages ignore this. A package that is only in the subscription needs no price; subscribers get its license key from their account.</p>
         <label>Version <input name="version" value="{{ old('version', $package->version) }}" required></label>
         <label>Platform version <input name="platform_version" value="{{ old('platform_version', $package->platform_version) }}"></label>
         <label>Author <input name="author" value="{{ old('author', $package->author) }}" maxlength="120"></label>

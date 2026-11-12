@@ -13,6 +13,7 @@
                 'admin/catalog' => 'Pricing',
                 'admin/licenses' => 'Licenses',
                 'admin/orders' => 'Orders',
+                'admin/subscriptions' => 'Subscriptions',
                 'admin/stores' => 'Connected stores',
                 'admin/users' => 'Users',
                 'admin/general' => 'Settings',

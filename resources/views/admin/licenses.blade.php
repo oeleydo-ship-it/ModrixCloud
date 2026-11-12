@@ -14,7 +14,15 @@
             @forelse ($licenses as $license)
                 @php($activation = $license->activations->first())
                 <tr>
-                    <td><code>{{ $license->key }}</code><br><span class="meta">{{ ucfirst($license->type) }}</span></td>
+                    <td>
+                        <code>{{ $license->key }}</code><br>
+                        @if ($license->type === 'subscription')
+                            @php($subscription = $license->user?->subscriptions->first())
+                            <span class="meta">Subscription{{ $subscription ? ' · '.str_replace('_', ' ', $subscription->status) : '' }}</span>
+                        @else
+                            <span class="meta">{{ $license->type === 'paid' ? 'Purchase' : ucfirst($license->type) }}</span>
+                        @endif
+                    </td>
                     <td>{{ $license->user?->email }}</td>
                     <td>{{ $license->package?->name }}</td>
                     <td><span class="status status-{{ $license->status }}">{{ ucfirst($license->status) }}</span></td>

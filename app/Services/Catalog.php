@@ -22,6 +22,8 @@ class Catalog
 
     private ?string $currency = null;
 
+    private ?bool $subscriptionOpen = null;
+
     /**
      * @return Collection<int, array<string, mixed>>
      */
@@ -62,8 +64,15 @@ class Catalog
             'version' => $release?->version ?? $package->version,
             'platform_version' => $release?->platform_version ?? $package->platform_version,
             'premium' => ! $package->is_free,
+            // Paid packages are sold individually, included in the subscription, or both.
+            'sold_individually' => $package->buyable(),
+            'in_subscription' => $package->inSubscription() && $this->subscriptionOpen(),
             'price' => $package->price,
-            'price_label' => $package->is_free ? 'Free' : $currency.' '.$package->price,
+            'price_label' => match (true) {
+                $package->is_free => 'Free',
+                ! $package->buyable() => 'Subscription',
+                default => $currency.' '.$package->price,
+            },
             'featured' => $package->featured,
             'demo_url' => $package->demo_url,
             'repository_url' => $package->repository_url,
@@ -80,7 +89,7 @@ class Catalog
     /**
      * Filtered, sorted page of packages for the home page.
      *
-     * @param  array<string, string>  $filters  q, type, tier, category, demo, sort
+     * @param  array<string, string>  $filters  q, type, tier (all|free|premium|subscription), category, demo, sort
      * @return array{items: Collection<int, array<string, mixed>>, total: int, pages: int, page: int}
      */
     public function browse(array $filters, int $page): array
@@ -93,7 +102,12 @@ class Catalog
         $sort = $filters['sort'] ?? 'featured';
 
         $visible = $this->published()->filter(fn (array $p) => ($type === 'all' || $p['type'] === $type)
-            && ($tier === 'all' || ($tier === 'premium' ? $p['premium'] : ! $p['premium']))
+            && match ($tier) {
+                'premium' => $p['premium'],
+                'free' => ! $p['premium'],
+                'subscription' => $p['in_subscription'],
+                default => true,
+            }
             && ($category === '' || isset($p['category_labels'][$category]))
             && (! $demo || ! empty($p['demo_url']))
             && ($query === '' || stripos($p['name'].' '.$p['summary'].' '.$p['author'].' '.$p['identifier'].' '.implode(' ', array_column($p['category_labels'], 'name')), $query) !== false));
@@ -134,6 +148,12 @@ class Catalog
     public function currency(): string
     {
         return $this->currency ??= strtoupper((string) (Setting::get('currency') ?: config('marketplace.currency', 'USD')));
+    }
+
+    /** New customers can subscribe (Admin → Pricing → Monthly subscription). */
+    public function subscriptionOpen(): bool
+    {
+        return $this->subscriptionOpen ??= app(Subscriptions::class)->available();
     }
 
     public function catalogName(): string

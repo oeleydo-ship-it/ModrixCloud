@@ -35,7 +35,7 @@ working.
 ## What it does
 
 **Catalog** (`/`, `/item/{slug}`): themes and extensions with categories,
-search, free/paid and live-demo filters, sorting and pagination. Free packages
+search, free/paid/included-in-subscription and live-demo filters, sorting and pagination. Free packages
 download from `/download/{slug}`; paid ones for customers who own them.
 
 **Accounts** (`/account`): register, sign in, generate a license for a free
@@ -55,6 +55,49 @@ set up.
 **Checkout** (`/buy/{slug}`): Stripe Checkout. The signed webhook at
 `/stripe/webhook` marks the order paid, issues the license and emails the key.
 Refunds revoke the license.
+
+**Monthly subscription** (`/subscription`, `/subscribe`): customers can buy a
+paid package individually, subscribe monthly, or both. Under Admin → Pricing
+the admin turns the subscription on and sets its name, monthly price and
+currency, plus an optional Stripe recurring Price ID (`price_…`). Without a
+Price ID, checkout sends the price and currency as a monthly price. The same
+page, and each listing under Admin → Repository, says how every paid package
+is sold:
+
+- sold individually (the default, also for packages that existed before);
+- included in the subscription only (no `/buy` checkout, no price needed);
+- both.
+
+New packages are sold individually until the admin includes them. Free
+packages stay free for everyone.
+
+Subscribing opens Stripe Checkout in `mode=subscription`. The webhook keeps
+the subscription in sync:
+
+- `checkout.session.completed` (subscription mode) starts it;
+- `customer.subscription.updated` records status, renewal date and
+  cancel-at-period-end;
+- `customer.subscription.deleted` ends it;
+- `invoice.payment_failed` marks it past due. Access continues while Stripe
+  retries, until Stripe cancels the subscription or marks it unpaid.
+
+While it is active (or trialing, or past due) the customer gets a key for any
+included package from `/account` or a connected store, like a free one. The
+key is still one per customer and package, active on one store at a time.
+Licenses show where they came from: `free`, `paid` (bought) or
+`subscription`. When the subscription ends, or the admin takes the package
+out of the subscription, its subscription licenses become `expired`, so
+`licenses/check` answers with that status, and `updates`, `downloads` and
+`licenses/activate` refuse them. Subscribing again reactivates the same keys.
+Licenses bought individually are never affected, and buying a package held
+through the subscription makes its key permanent (`paid`). `/account` shows
+the subscription with **Manage billing** (the Stripe customer portal; turn
+it on in Stripe's billing settings) and **Cancel subscription** (at the end
+of the paid month). Admin → Subscriptions lists every subscription by
+status, and the Orders and Licenses lists show subscriptions too. Add
+`customer.subscription.updated`, `customer.subscription.deleted` and
+`invoice.payment_failed` to the Stripe webhook's events (Admin → Settings →
+Payments lists them all).
 
 **Publishers** (`/submit`, `/submit/update`, `/submissions`): upload a ZIP with
 `module.json` or `theme.json` at its root; name and version must match the
@@ -87,8 +130,9 @@ The submission is recorded as rejected, with the findings as the note. The ZIP i
 Code that is risky but sometimes legitimate is only flagged for the reviewer. That includes raw sockets, `gzinflate`/`str_rot13`, `putenv`, `eval`/`new Function` in JavaScript, very long encoded strings and files over 2 MB.
 
 **Admin** (`/admin`): overview, repository (edit listings, thumbnails, prices,
-status, categories and releases), submissions, updates, categories, pricing,
-licenses (search, disconnect, revoke), orders, and settings (name, currency,
+how each package is sold, status, categories and releases), submissions,
+updates, categories, pricing (with the subscription plan), licenses (search,
+disconnect, revoke), orders, subscriptions, and settings (name, currency,
 logo, Stripe, SMTP with a test email, and the signing public key).
 
 **Store API** (`/api/marketplace/v1/…`): `catalog`, `licenses/activate`,

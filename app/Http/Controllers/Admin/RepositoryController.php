@@ -15,13 +15,18 @@ use Marketplace\Models\Order;
 use Marketplace\Models\Package;
 use Marketplace\Models\PackageRelease;
 use Marketplace\Models\Submission;
+use Marketplace\Models\Subscription;
 use Marketplace\Services\Releases;
 use Marketplace\Services\Submissions;
+use Marketplace\Services\Subscriptions;
 use Marketplace\Services\Uploads;
 
 /** Admin overview and the package repository: listings, releases, categories, prices. */
 class RepositoryController
 {
+    /** How a paid package is offered. */
+    public const SALE_MODES = ['individual', 'subscription', 'both'];
+
     public function overview(): View
     {
         return view('admin.overview', [
@@ -30,6 +35,7 @@ class RepositoryController
                 'Pending submissions' => Submission::query()->where('status', 'pending')->count(),
                 'Active licenses' => License::query()->where('status', 'active')->count(),
                 'Paid orders' => Order::query()->where('status', 'paid')->count(),
+                'Active subscriptions' => Subscription::query()->live()->count(),
             ],
             'recent' => Submission::query()->with('user')->latest()->limit(5)->get(),
         ]);
@@ -175,25 +181,56 @@ class RepositoryController
     }
 
     /** Prices for every package on one page. */
-    public function pricing(): View
+    public function pricing(Subscriptions $subscriptions): View
     {
-        return view('admin.pricing', ['packages' => Package::query()->orderBy('name')->get()]);
+        return view('admin.pricing', [
+            'packages' => Package::query()->orderBy('name')->get(),
+            'plan' => $subscriptions->plan(),
+            'subscribers' => Subscription::query()->live()->count(),
+        ]);
     }
 
-    public function savePricing(Request $request): RedirectResponse
+    public function savePricing(Request $request, Subscriptions $subscriptions): RedirectResponse
     {
         $data = $request->validate([
             'prices' => ['array'],
             'prices.*.tier' => ['required', 'in:free,premium'],
             'prices.*.price' => ['nullable', 'numeric', 'min:0', 'max:99999'],
+            'prices.*.sale' => ['nullable', 'in:'.implode(',', self::SALE_MODES)],
         ]);
 
         foreach ($data['prices'] ?? [] as $id => $row) {
-            $premium = $row['tier'] === 'premium' && (float) ($row['price'] ?? 0) > 0;
-            Package::query()->whereKey((int) $id)->update(['is_free' => ! $premium, 'price' => $premium ? $row['price'] : 0]);
+            $package = Package::query()->find((int) $id);
+
+            if ($package instanceof Package) {
+                $package->forceFill(self::priceColumns($row['tier'], $row['price'] ?? null, $row['sale'] ?? $package->saleMode()))->save();
+                $subscriptions->syncPackage($package);
+            }
         }
 
         return redirect('/admin/catalog')->with('notice', 'Prices saved.');
+    }
+
+    /**
+     * Price columns from the admin forms. A paid package is sold individually
+     * (needs a price), included in the subscription (price optional), or both.
+     * A paid package sold individually at 0 is free, as before.
+     *
+     * @return array{is_free: bool, price: mixed, sold_individually: bool, in_subscription: bool}
+     */
+    public static function priceColumns(string $tier, mixed $price, string $sale): array
+    {
+        $price = (float) ($price ?? 0) > 0 ? $price : 0;
+        $sale = in_array($sale, self::SALE_MODES, true) ? $sale : 'individual';
+
+        if ($tier !== 'premium' || ($price === 0 && $sale === 'individual')) {
+            return ['is_free' => true, 'price' => 0, 'sold_individually' => true, 'in_subscription' => false];
+        }
+
+        // Without a price a package cannot be bought on its own.
+        $individual = $price !== 0 && $sale !== 'subscription';
+
+        return ['is_free' => false, 'price' => $price, 'sold_individually' => $individual, 'in_subscription' => $sale !== 'individual'];
     }
 
     /** @return array<string, list<mixed>> */
@@ -204,7 +241,8 @@ class RepositoryController
             'summary' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:20000'],
             'tier' => ['required', 'in:free,premium'],
-            'price' => ['required_if:tier,premium', 'nullable', 'numeric', 'min:0', 'max:99999'],
+            'price' => ['nullable', 'numeric', 'min:0', 'max:99999'],
+            'sale' => ['nullable', 'in:'.implode(',', self::SALE_MODES)],
             'status' => ['required', 'in:draft,published,hidden'],
             'version' => ['required', 'string', 'max:32', 'regex:'.PublishController::VERSION],
             'platform_version' => ['nullable', 'string', 'max:64'],
@@ -224,15 +262,14 @@ class RepositoryController
     /** @param  array<string, mixed>  $data */
     private function fill(Request $request, Package $package, array $data, Uploads $uploads): void
     {
-        $premium = $data['tier'] === 'premium' && (float) ($data['price'] ?? 0) > 0;
+        $pricing = self::priceColumns($data['tier'], $data['price'] ?? null, $data['sale'] ?? $package->saleMode());
         $features = array_values(array_filter(array_map('trim', preg_split('/\R/', (string) ($data['features_text'] ?? '')) ?: []), fn ($f) => $f !== ''));
 
         $package->fill([
             'name' => $data['name'],
             'summary' => $data['summary'],
             'description' => $data['description'] ?? $package->description,
-            'is_free' => ! $premium,
-            'price' => $premium ? $data['price'] : 0,
+            ...$pricing,
             'status' => $data['status'],
             'version' => $data['version'],
             'platform_version' => ($data['platform_version'] ?? '') ?: ($package->platform_version ?: '^1.0'),
@@ -251,5 +288,6 @@ class RepositoryController
 
         $package->save();
         $package->categories()->sync(Category::query()->whereIn('slug', $data['categories'] ?? [])->pluck('id'));
+        app(Subscriptions::class)->syncPackage($package);
     }
 }

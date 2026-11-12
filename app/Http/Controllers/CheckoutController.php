@@ -5,6 +5,7 @@ namespace Marketplace\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Marketplace\Models\License;
 use Marketplace\Models\Order;
 use Marketplace\Models\Package;
 use Marketplace\Services\Catalog;
@@ -19,9 +20,13 @@ class CheckoutController
 {
     public function store(Request $request, Package $package, StripeGateway $stripe, Catalog $catalog): RedirectResponse
     {
-        abort_if($package->status !== 'published' || $package->is_free, 404);
+        // Subscription-only packages have no individual checkout.
+        abort_if($package->status !== 'published' || ! $package->buyable(), 404);
 
-        if ($catalog->owns($request->user(), $package)) {
+        // A license from the subscription can be bought outright: the purchase makes it permanent.
+        $license = License::query()->where('user_id', $request->user()->id)->where('package_id', $package->id)->where('status', 'active')->first();
+
+        if ($license instanceof License && $license->type !== 'subscription') {
             return back()->withErrors(['checkout' => 'You already own this package. Its license key is in your account.']);
         }
 

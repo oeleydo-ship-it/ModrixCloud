@@ -43,24 +43,51 @@
         </div>
         <aside class="purchase-panel">
             <span class="package-kind">{{ $product['premium'] ? 'PAID '.strtoupper($kind) : 'FREE '.strtoupper($kind) }}</span>
+            @if ($product['in_subscription'])<span class="subscription-badge">Included in subscription</span>@endif
             <p class="detail-price">{{ $product['price_label'] }}</p>
-            <p class="meta">{{ $product['premium'] ? 'One-time purchase in '.$currency.'.' : 'Start building without a package fee.' }}</p>
+            <p class="meta">
+                @if (! $product['premium'])
+                    Start building without a package fee.
+                @elseif ($product['sold_individually'] && $product['in_subscription'])
+                    One-time purchase in {{ $currency }}, or included in the monthly subscription ({{ $plan }}).
+                @elseif ($product['sold_individually'])
+                    One-time purchase in {{ $currency }}.
+                @elseif ($product['in_subscription'])
+                    Available with the monthly subscription ({{ $plan }}).
+                @else
+                    Not available to new customers right now.
+                @endif
+            </p>
             @if (! empty($product['demo_url']))
                 <a class="button demo-button" href="{{ $product['demo_url'] }}" target="_blank" rel="noopener noreferrer">View live demo ↗</a>
             @endif
-            @if ($product['premium'])
-                <p class="purchase-license-note">Purchase this item first to get a license key in your account.</p>
+            @if ($product['premium'] && ! $owned && ! $covered)
+                <p class="purchase-license-note">{{ $product['in_subscription'] ? ($product['sold_individually'] ? 'Buy this item or subscribe' : 'Subscribe') : 'Purchase this item first' }} to get a license key in your account.</p>
             @endif
             @if ($owned)
-                <p>You own this product. The license key is in your account.</p>
+                <p>{{ $ownedVia === 'subscription' ? 'Included in your subscription.' : 'You own this product.' }} The license key is in your account.</p>
                 <a class="button" href="{{ url('/account?product='.$product['slug']) }}">Manage license ↗</a>
             @elseif (! $product['premium'])
                 <p>This product is free.</p>
                 <a class="button" href="{{ auth()->check() ? url('/account?product='.$product['slug']) : url('/account/login?next='.rawurlencode('/account?product='.$product['slug'])) }}">Generate a free license ↗</a>
-            @elseif (! auth()->check())
-                <a class="button" href="{{ url('/account/login?next='.rawurlencode('/item/'.$product['slug'])) }}">Buy now</a>
             @else
-                <form method="post" action="{{ url('/buy/'.$product['slug']) }}">@csrf<button type="submit">Buy now</button></form>
+                @if ($covered)
+                    <p>Included in your subscription.</p>
+                    <a class="button" href="{{ url('/account?product='.$product['slug']) }}">Get your license ↗</a>
+                @endif
+                @if ($product['sold_individually'])
+                    @if (! auth()->check())
+                        <a class="button" href="{{ url('/account/login?next='.rawurlencode('/item/'.$product['slug'])) }}">Buy now</a>
+                    @else
+                        <form method="post" action="{{ url('/buy/'.$product['slug']) }}">@csrf<button type="submit" @class(['secondary' => $covered])>{{ $covered ? 'Buy to keep it' : 'Buy now' }}</button></form>
+                    @endif
+                @endif
+                @if ($product['in_subscription'] && ! $covered)
+                    <a class="button{{ $product['sold_individually'] ? ' secondary' : '' }}" href="{{ url('/subscription') }}">Subscribe · {{ $plan }}</a>
+                @endif
+            @endif
+            @if ($owned && $ownedVia === 'subscription' && $product['sold_individually'])
+                <form method="post" action="{{ url('/buy/'.$product['slug']) }}">@csrf<button class="secondary" type="submit">Buy to keep it after the subscription</button></form>
             @endif
             @if ($product['has_release'] && (! $product['premium'] || $owned))
                 <a class="button secondary" href="{{ url('/download/'.$product['slug']) }}">Download package ZIP ↓</a>

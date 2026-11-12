@@ -10,6 +10,7 @@ use Marketplace\Http\Controllers\Admin\SalesController;
 use Marketplace\Http\Controllers\Admin\SettingsController;
 use Marketplace\Http\Controllers\Admin\StoreAdminController;
 use Marketplace\Http\Controllers\Admin\SubmissionController;
+use Marketplace\Http\Controllers\Admin\SubscriptionAdminController;
 use Marketplace\Http\Controllers\Admin\UserAdminController;
 use Marketplace\Http\Controllers\AuthController;
 use Marketplace\Http\Controllers\PasswordResetController;
@@ -20,6 +21,7 @@ use Marketplace\Http\Controllers\EmailVerificationController;
 use Marketplace\Http\Controllers\InstallController;
 use Marketplace\Http\Controllers\PublishController;
 use Marketplace\Http\Controllers\StripeWebhookController;
+use Marketplace\Http\Controllers\SubscriptionController;
 use Marketplace\Http\Middleware\EnsureAdmin;
 use Marketplace\Http\Middleware\EnsureEmailVerified;
 
@@ -34,6 +36,7 @@ Route::get('item/{slug}', [CatalogController::class, 'show'])->name('catalog.sho
 Route::get('media/{slug}', [CatalogController::class, 'media'])->name('catalog.media');
 Route::get('branding/logo', [CatalogController::class, 'logo'])->name('catalog.logo');
 Route::get('download/{slug}', [CatalogController::class, 'download'])->middleware('throttle:30,1')->name('catalog.download');
+Route::get('subscription', [CatalogController::class, 'subscription'])->name('subscription');
 
 // Payments. The webhook is excluded from CSRF (bootstrap/app.php); Stripe signs it.
 Route::post('stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
@@ -74,6 +77,11 @@ Route::middleware(['auth', EnsureEmailVerified::class])->group(function () {
     Route::post('buy/{package:slug}', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
     Route::get('orders/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
+    // Monthly subscription.
+    Route::post('subscribe', [SubscriptionController::class, 'store'])->middleware('throttle:10,1')->name('subscription.store');
+    Route::post('account/subscription/portal', [SubscriptionController::class, 'portal'])->middleware('throttle:10,1');
+    Route::post('account/subscription/cancel', [SubscriptionController::class, 'cancel'])->middleware('throttle:10,1');
+
     // Publishers.
     Route::get('submit', [PublishController::class, 'create'])->name('publish.create');
     Route::post('submit', [PublishController::class, 'store'])->middleware('throttle:10,1');
@@ -105,6 +113,8 @@ Route::prefix('admin')->group(function () {
         Route::post('core/{release}/withdraw', [CoreReleaseController::class, 'withdraw']);
         Route::get('catalog', [RepositoryController::class, 'pricing'])->name('admin.catalog');
         Route::post('catalog', [RepositoryController::class, 'savePricing']);
+        Route::post('subscription-plan', [SubscriptionAdminController::class, 'savePlan']);
+        Route::get('subscriptions', [SubscriptionAdminController::class, 'index'])->name('admin.subscriptions');
 
         Route::get('submissions', [SubmissionController::class, 'index'])->name('admin.submissions');
         Route::post('submissions', [SubmissionController::class, 'review']);

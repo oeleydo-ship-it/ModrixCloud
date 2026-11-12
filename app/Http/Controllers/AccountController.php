@@ -11,14 +11,16 @@ use Marketplace\Models\Order;
 use Marketplace\Models\StoreConnection;
 use Marketplace\Services\Catalog;
 use Marketplace\Services\Licensing;
+use Marketplace\Services\Subscriptions;
 
 /** The signed-in customer's licenses, connected stores and orders. */
 class AccountController
 {
-    public function show(Request $request, Catalog $catalog): View
+    public function show(Request $request, Catalog $catalog, Subscriptions $subscriptions): View
     {
         $user = $request->user();
         $selected = $catalog->find((string) $request->query('product', ''));
+        $subscription = $subscriptions->current($user);
 
         return view('account.show', [
             'user' => $user,
@@ -26,12 +28,18 @@ class AccountController
             'orders' => Order::query()->where('user_id', $user->id)->with('package')->latest()->limit(50)->get(),
             'selected' => $selected,
             'free' => $catalog->published()->filter(fn ($p) => ! $p['premium'])->sortBy('name')->values(),
+            // Packages the customer's subscription gives them a license for.
+            'included' => $subscription === null ? collect() : $catalog->published()->filter(fn ($p) => $p['model']->inSubscription())->sortBy('name')->values(),
+            'subscription' => $subscription ?? $subscriptions->latest($user),
+            'subscriptionLive' => $subscription !== null,
+            'plan' => $subscriptions->available() ? $subscriptions->priceLabel() : null,
+            'pendingSubscription' => $subscription === null && $request->boolean('subscribed'),
             'connections' => StoreConnection::query()->where('user_id', $user->id)->whereNull('revoked_at')->latest()->get(),
         ]);
     }
 
-    /** A license for a free package, or for a paid one already bought. */
-    public function license(Request $request, Catalog $catalog, Licensing $licensing): RedirectResponse
+    /** A license for a free package, a paid one already bought, or one included in the subscription. */
+    public function license(Request $request, Catalog $catalog, Licensing $licensing, Subscriptions $subscriptions): RedirectResponse
     {
         $request->validate(['product' => ['required', 'string']]);
         $product = $catalog->find((string) $request->input('product'));
@@ -40,13 +48,19 @@ class AccountController
             throw ValidationException::withMessages(['product' => 'Choose a package from the marketplace.']);
         }
 
-        $owned = $catalog->owns($request->user(), $product['model']);
+        $license = $product['premium']
+            ? $subscriptions->claim($request->user(), $product['model'])
+            : $licensing->issue($request->user(), $product['model'], 'free');
 
-        if ($product['premium'] && ! $owned) {
-            throw ValidationException::withMessages(['product' => 'Buy this package first; its license key is issued with the purchase.']);
+        if ($license === null) {
+            throw ValidationException::withMessages(['product' => $product['in_subscription'] && $subscriptions->available()
+                ? 'Buy this package or subscribe; its license key comes with either.'
+                : 'Buy this package first; its license key is issued with the purchase.']);
         }
 
-        $license = $licensing->issue($request->user(), $product['model'], $product['premium'] ? 'paid' : 'free');
+        if ($license->status === 'expired' && $license->type === 'subscription') {
+            throw ValidationException::withMessages(['product' => 'This key came with your subscription, which has ended. Subscribe again or buy the package to use it.']);
+        }
 
         if ($license->status !== 'active') {
             throw ValidationException::withMessages(['product' => 'Your license for this package was '.$license->status.'. Contact support if you think this is a mistake.']);

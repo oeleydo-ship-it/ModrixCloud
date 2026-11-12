@@ -35,6 +35,9 @@
             @foreach ($categories as $category)
                 <a class="category-link{{ $filters['category'] === $category['slug'] ? ' active' : '' }}" href="{{ $browseUrl(['category' => $category['slug']]) }}">{{ $category['name'] }}<span>{{ $category['count'] }}</span></a>
             @endforeach
+            @if ($subscriptionOpen)
+                <div class="sidebar-note subscription-note"><strong>Monthly subscription</strong><p>Every package marked “Included in subscription” for {{ $subscriptionPrice }}. Cancel any time.</p><a href="{{ url('/subscription') }}">See what is included →</a></div>
+            @endif
             <div class="sidebar-note"><strong>Build your next store</strong><p>Find a theme for your brand. Add extensions as your store grows.</p><a href="{{ url('/submit') }}">Become a publisher →</a></div>
         </aside>
         <section class="catalog-results" id="catalog">
@@ -44,7 +47,7 @@
                 <input type="hidden" name="q" value="{{ $filters['q'] }}">
                 <label>Price
                     <select name="tier">
-                        @foreach (['all' => 'All prices', 'free' => 'Free', 'premium' => 'Paid'] as $value => $label)
+                        @foreach (['all' => 'All prices', 'free' => 'Free', 'premium' => 'Paid'] + ($subscriptionOpen ? ['subscription' => 'Included in subscription'] : []) as $value => $label)
                             <option value="{{ $value }}" @selected($filters['tier'] === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
