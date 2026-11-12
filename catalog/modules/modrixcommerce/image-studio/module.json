@@ -3,7 +3,7 @@
     "name": "modrixcommerce/image-studio",
     "display_name": "Image Studio",
     "description": "Turns product images into transparent-background WebP variants served on the storefront, leaving the originals untouched.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "image",
     "accent": "#0ea5e9",

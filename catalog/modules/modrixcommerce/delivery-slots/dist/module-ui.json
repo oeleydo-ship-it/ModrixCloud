@@ -1,0 +1,15 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-B9w8aAXk.js",
+        "admin/settings": "pages/admin/settings-BaGsDg1r.js",
+        "admin/slots": "pages/admin/slots-DxuAgz1z.js"
+    },
+    "slots": {
+        "DeliveryOrderSummary": "slots/DeliveryOrderSummary-QmJZiC4D.js",
+        "DeliverySlotPicker": "slots/DeliverySlotPicker-CXoSq5tC.js"
+    },
+    "css": [
+        "module-style-CTyHrOpC.css"
+    ]
+}

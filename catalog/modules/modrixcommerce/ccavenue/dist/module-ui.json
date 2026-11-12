@@ -1,0 +1,11 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-DQjHCW0j.js",
+        "storefront/handoff": "pages/storefront/handoff-DhL_139Q.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-Xsm8dcay.css"
+    ]
+}

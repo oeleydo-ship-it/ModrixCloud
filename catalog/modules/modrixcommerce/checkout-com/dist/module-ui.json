@@ -1,0 +1,11 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-S9PDZ2Xj.js",
+        "storefront/flow": "pages/storefront/flow-Cfn43mrM.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-CGM1P1GX.css"
+    ]
+}

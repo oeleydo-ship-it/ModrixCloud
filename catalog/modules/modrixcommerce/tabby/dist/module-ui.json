@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-DF3uW1fR.js"
+    },
+    "slots": {
+        "TabbyCheckout": "slots/TabbyCheckout-BjU_f6o3.js",
+        "TabbyPromo": "slots/TabbyPromo-DPBsVhCL.js"
+    },
+    "css": [
+        "module-style-CMKrL8Sn.css"
+    ]
+}

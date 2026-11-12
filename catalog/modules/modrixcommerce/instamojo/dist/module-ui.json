@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-D3GAPlHN.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-DQXFt4mu.css"
+    ]
+}

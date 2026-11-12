@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-B8GXGpya.js"
+    },
+    "slots": {
+        "TamaraCheckout": "slots/TamaraCheckout-B_JDJity.js",
+        "TamaraPromo": "slots/TamaraPromo-lfu7M4FA.js"
+    },
+    "css": [
+        "module-style-B_He4a1V.css"
+    ]
+}

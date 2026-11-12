@@ -1,0 +1,15 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/dashboard": "pages/admin/dashboard-D8GOOVeP.js",
+        "admin/order-detail": "pages/admin/order-detail-DMnMdlAf.js",
+        "admin/queue": "pages/admin/queue-DwnPkDYp.js",
+        "admin/reports": "pages/admin/reports-CSdlz3XH.js",
+        "admin/rules": "pages/admin/rules-DkUrOE6o.js",
+        "admin/settings": "pages/admin/settings-Cx8zPsn2.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style--Q9sJl-T.css"
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-HAGUC0PB.js"
+    },
+    "slots": {
+        "BundleWidget": "slots/BundleWidget-qgl8vDDU.js"
+    },
+    "css": [
+        "module-style-D4xvASB6.css"
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/form": "pages/admin/form-_yAYTQOh.js",
+        "admin/index": "pages/admin/index-sKHtTCAM.js"
+    },
+    "slots": {
+        "AddedPopup": "slots/AddedPopup-CBvTUVs1.js",
+        "CartOffers": "slots/CartOffers-DnZ3Zl0m.js",
+        "CheckoutBump": "slots/CheckoutBump-BLOuu3rs.js",
+        "OfferProducts": "slots/OfferProducts-DWoYIBJS.js"
+    },
+    "css": [
+        "module-style-BQTyldgV.css"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-LcKZNHUz.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-mCvbqneV.css"
+    ]
+}

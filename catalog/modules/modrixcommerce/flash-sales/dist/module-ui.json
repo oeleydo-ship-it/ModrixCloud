@@ -1,0 +1,14 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/form": "pages/admin/form-Qm_OrHgM.js",
+        "admin/index": "pages/admin/index-DOs1SwWW.js"
+    },
+    "slots": {
+        "FlashSaleBanner": "slots/FlashSaleBanner-Ca7l7wfq.js",
+        "ProductFlashSalePanel": "slots/ProductFlashSalePanel-DFK9Bfga.js"
+    },
+    "css": [
+        "module-style-HLxkJWhW.css"
+    ]
+}

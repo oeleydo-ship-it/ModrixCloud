@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-CHUxB_NJ.js",
+        "storefront/index": "pages/storefront/index-DhEf4Jz-.js"
+    },
+    "slots": {
+        "ReturnRequest": "slots/ReturnRequest-BJT0FFqk.js"
+    },
+    "css": [
+        "module-style-eNkdBPZ5.css"
+    ]
+}

@@ -3,7 +3,7 @@
     "name": "modrixcommerce/gdpr-cookie-consent",
     "display_name": "GDPR Cookie Consent",
     "description": "Shows a cookie-consent banner to visitors from the EU, EEA, the UK and Switzerland so the store can lawfully set marketing and analytics cookies. Records each consent decision (accept, reject or custom categories) for your accountability records.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "cookie",
     "accent": "#0ea5e9",
@@ -55,8 +55,14 @@
             "help": "GDPR only: EU/EEA, UK and Switzerland. Everyone: all visitors, wherever they are.",
             "default": "gdpr",
             "options": [
-                { "value": "gdpr", "label": "GDPR countries only" },
-                { "value": "all", "label": "Everyone" }
+                {
+                    "value": "gdpr",
+                    "label": "GDPR countries only"
+                },
+                {
+                    "value": "all",
+                    "label": "Everyone"
+                }
             ]
         },
         {

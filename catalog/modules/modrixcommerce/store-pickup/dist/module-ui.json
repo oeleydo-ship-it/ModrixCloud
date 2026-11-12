@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-icZQrXvH.js"
+    },
+    "slots": {
+        "StorePickupOrderSummary": "slots/StorePickupOrderSummary-DBSx5Gxx.js",
+        "StorePickupPicker": "slots/StorePickupPicker-DMZilT4z.js"
+    },
+    "css": [
+        "module-style-BgWDMGbR.css"
+    ]
+}

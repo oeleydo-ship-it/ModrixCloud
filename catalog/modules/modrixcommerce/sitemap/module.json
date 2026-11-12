@@ -3,7 +3,7 @@
     "name": "modrixcommerce/sitemap",
     "display_name": "XML Sitemap",
     "description": "Publishes an XML sitemap of your storefront at /sitemap.xml for search engines: your home page, products, categories, brands and content pages, with images and last-modified dates.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "scroll-text",
     "accent": "#0f766e",
@@ -81,9 +81,18 @@
             "help": "A hint for crawlers, not a command. Weekly suits most catalogues.",
             "default": "weekly",
             "options": [
-                { "value": "daily", "label": "Daily" },
-                { "value": "weekly", "label": "Weekly" },
-                { "value": "monthly", "label": "Monthly" }
+                {
+                    "value": "daily",
+                    "label": "Daily"
+                },
+                {
+                    "value": "weekly",
+                    "label": "Weekly"
+                },
+                {
+                    "value": "monthly",
+                    "label": "Monthly"
+                }
             ]
         }
     ],

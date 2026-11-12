@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {},
+    "slots": {
+        "SalesTrend": "slots/SalesTrend-CCs7k7fX.js"
+    },
+    "css": [
+        "module-style-7y17U5CH.css"
+    ]
+}

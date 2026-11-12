@@ -3,7 +3,7 @@
     "name": "modrixcommerce/refund-management",
     "display_name": "Advanced Refund Management",
     "description": "Adds advanced refund management to Modrix Commerce, enabling merchants to process partial and full refunds, generate credit memos, and track refund payments directly from the Admin Panel.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "receipt",
     "accent": "#e11d48",

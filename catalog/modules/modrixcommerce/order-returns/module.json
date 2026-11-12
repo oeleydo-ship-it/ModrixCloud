@@ -3,7 +3,7 @@
     "name": "modrixcommerce/order-returns",
     "display_name": "Order Returns",
     "description": "Customers request a return for items from a delivered order. Staff approve or reject each request with a comment. Approving a request does not refund the payment or restock the items.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "package",
     "accent": "#0f766e",
@@ -58,8 +58,14 @@
             "help": "Delivered waits until the order is marked delivered. Shipped also allows orders that are still with the carrier.",
             "default": "delivered",
             "options": [
-                { "value": "delivered", "label": "Delivered" },
-                { "value": "shipped", "label": "Shipped" }
+                {
+                    "value": "delivered",
+                    "label": "Delivered"
+                },
+                {
+                    "value": "shipped",
+                    "label": "Shipped"
+                }
             ]
         },
         {

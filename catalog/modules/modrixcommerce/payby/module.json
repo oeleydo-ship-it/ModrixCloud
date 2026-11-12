@@ -3,7 +3,7 @@
     "name": "modrixcommerce/payby",
     "display_name": "PayBy (Astra Tech)",
     "description": "PayBy payment gateway for the UAE with cards, Botim wallet, Apple Pay, and RSA-SHA256 asymmetric cryptographic security.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#ff5e00",

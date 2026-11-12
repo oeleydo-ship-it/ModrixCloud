@@ -3,7 +3,7 @@
     "name": "modrixcommerce/product-addons",
     "display_name": "Product Addons & Warranties",
     "description": "Offer customizable extended warranties, extra features, and service add-ons assigned to specific products, categories, or your entire catalog, with automatic cart and checkout pricing.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "shield-check",
     "accent": "#10b981",
@@ -68,9 +68,18 @@
             "label": "Position on product page",
             "default": "product.after_add_to_cart",
             "options": [
-                { "value": "product.after_price", "label": "Right below the price" },
-                { "value": "product.after_add_to_cart", "label": "Below Add to Cart button" },
-                { "value": "product.after_details", "label": "Below product description" }
+                {
+                    "value": "product.after_price",
+                    "label": "Right below the price"
+                },
+                {
+                    "value": "product.after_add_to_cart",
+                    "label": "Below Add to Cart button"
+                },
+                {
+                    "value": "product.after_details",
+                    "label": "Below product description"
+                }
             ]
         }
     ],

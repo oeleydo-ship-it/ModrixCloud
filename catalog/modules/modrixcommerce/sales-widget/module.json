@@ -3,7 +3,7 @@
     "name": "modrixcommerce/sales-widget",
     "display_name": "Sales Trend Widget",
     "description": "Adds a daily sales chart for recent days to the admin dashboard.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "chart-column",
     "accent": "#10b981",
@@ -16,7 +16,10 @@
         }
     },
     "provider": "EcoModular\\SalesWidget\\SalesWidgetServiceProvider",
-    "capabilities": ["dashboard.widgets", "settings"],
+    "capabilities": [
+        "dashboard.widgets",
+        "settings"
+    ],
     "assets": {
         "slots": "resources/js/slots"
     },

@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-ptLsJjOy.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-LdtH2O-2.css"
+    ]
+}

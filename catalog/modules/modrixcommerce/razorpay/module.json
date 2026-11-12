@@ -3,14 +3,18 @@
     "name": "modrixcommerce/razorpay",
     "display_name": "Razorpay",
     "description": "Razorpay payment gateway with server-created Orders, Standard Checkout, captured payment verification, signed webhooks and protected partial or full refunds.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#2563eb",
     "platform_version": "^1.0",
     "author": "Modrix team",
     "license": "MIT",
-    "autoload": { "psr-4": { "ModrixCommerce\\Razorpay\\": "src/" } },
+    "autoload": {
+        "psr-4": {
+            "ModrixCommerce\\Razorpay\\": "src/"
+        }
+    },
     "provider": "ModrixCommerce\\Razorpay\\RazorpayServiceProvider",
     "capabilities": [
         "payment.gateway",
@@ -25,7 +29,9 @@
         "admin": "routes/admin.php",
         "storefront": "routes/storefront.php"
     },
-    "assets": { "pages": "resources/js/pages" },
+    "assets": {
+        "pages": "resources/js/pages"
+    },
     "content_security": {
         "script-src": [
             "https://checkout.razorpay.com",

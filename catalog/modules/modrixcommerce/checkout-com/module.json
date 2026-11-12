@@ -3,7 +3,7 @@
     "name": "modrixcommerce/checkout-com",
     "display_name": "Checkout.com",
     "description": "Accept cards, Apple Pay, Google Pay, and local payment methods with Checkout.com. Customers pay on Checkout.com's hosted page, or in Flow embedded on your checkout. Card details never reach this store.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#0c1b33",

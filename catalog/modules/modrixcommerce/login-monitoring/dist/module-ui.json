@@ -1,0 +1,18 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/audit-logs": "pages/admin/audit-logs-DsOCfZHD.js",
+        "admin/dashboard": "pages/admin/dashboard-BUt9JvRJ.js",
+        "admin/incidents": "pages/admin/incidents-CkL9kMXS.js",
+        "admin/live-activity": "pages/admin/live-activity-7p1iRVAm.js",
+        "admin/mfa-settings": "pages/admin/mfa-settings-CwRqnrxh.js",
+        "admin/policies": "pages/admin/policies-BFx-cmsj.js",
+        "admin/reports": "pages/admin/reports-CiMLJwNk.js",
+        "admin/sessions": "pages/admin/sessions-DOjjPRYA.js",
+        "admin/suspicious-queue": "pages/admin/suspicious-queue-BlpwvgfI.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-BEVNaORd.css"
+    ]
+}

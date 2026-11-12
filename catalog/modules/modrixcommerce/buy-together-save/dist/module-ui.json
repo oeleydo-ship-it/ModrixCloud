@@ -1,0 +1,14 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/edit": "pages/admin/edit-iQ2KRfpM.js",
+        "admin/index": "pages/admin/index-DUi9CBwc.js",
+        "admin/settings": "pages/admin/settings-DIOnFmAX.js"
+    },
+    "slots": {
+        "BuyTogetherSaveWidget": "slots/BuyTogetherSaveWidget-BAmRz7GP.js"
+    },
+    "css": [
+        "module-style-CdZ_8mR5.css"
+    ]
+}

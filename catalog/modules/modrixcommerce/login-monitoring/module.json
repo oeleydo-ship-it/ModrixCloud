@@ -3,7 +3,7 @@
     "name": "modrixcommerce/login-monitoring",
     "display_name": "Login Monitoring",
     "description": "Comprehensive authentication intelligence and session security engine to track logins, stop brute-force attacks, detect impossible travel, and prevent account takeovers.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "fingerprint",
     "accent": "#059669",
@@ -128,10 +128,22 @@
             "help": "Determines when MFA verification is enforced for users.",
             "default": "risk_based",
             "options": [
-                { "value": "optional", "label": "Optional (User choice)" },
-                { "value": "risk_based", "label": "Risk-Based (Triggered on unfamiliar device/location)" },
-                { "value": "staff_only", "label": "Enforce for Staff & Admin accounts only" },
-                { "value": "all_users", "label": "Strict (Enforce for all users)" }
+                {
+                    "value": "optional",
+                    "label": "Optional (User choice)"
+                },
+                {
+                    "value": "risk_based",
+                    "label": "Risk-Based (Triggered on unfamiliar device/location)"
+                },
+                {
+                    "value": "staff_only",
+                    "label": "Enforce for Staff & Admin accounts only"
+                },
+                {
+                    "value": "all_users",
+                    "label": "Strict (Enforce for all users)"
+                }
             ]
         },
         {

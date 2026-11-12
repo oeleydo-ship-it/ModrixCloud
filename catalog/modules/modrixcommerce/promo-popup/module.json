@@ -3,7 +3,7 @@
     "name": "modrixcommerce/promo-popup",
     "display_name": "Marketing Popup",
     "description": "Shows a marketing pop-up on your storefront: an offer headline with a discount coupon, an email sign-up with recorded consent, or both. Collects leads and hands out coupon codes.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "megaphone",
     "accent": "#db2777",
@@ -55,9 +55,18 @@
             "help": "Coupon: reveal a discount code. Email: collect an address. Both: collect the address, then reveal the code.",
             "default": "both",
             "options": [
-                { "value": "both", "label": "Email sign-up and coupon" },
-                { "value": "email", "label": "Email sign-up only" },
-                { "value": "coupon", "label": "Coupon only" }
+                {
+                    "value": "both",
+                    "label": "Email sign-up and coupon"
+                },
+                {
+                    "value": "email",
+                    "label": "Email sign-up only"
+                },
+                {
+                    "value": "coupon",
+                    "label": "Coupon only"
+                }
             ]
         },
         {
@@ -105,8 +114,14 @@
             "label": "Where it appears",
             "default": "all",
             "options": [
-                { "value": "all", "label": "Every storefront page" },
-                { "value": "home", "label": "The home page only" }
+                {
+                    "value": "all",
+                    "label": "Every storefront page"
+                },
+                {
+                    "value": "home",
+                    "label": "The home page only"
+                }
             ]
         },
         {
@@ -124,9 +139,18 @@
             "label": "How often to show it",
             "default": "session",
             "options": [
-                { "value": "session", "label": "Once per visit" },
-                { "value": "once", "label": "Once per browser" },
-                { "value": "always", "label": "Every page load" }
+                {
+                    "value": "session",
+                    "label": "Once per visit"
+                },
+                {
+                    "value": "once",
+                    "label": "Once per browser"
+                },
+                {
+                    "value": "always",
+                    "label": "Every page load"
+                }
             ]
         }
     ],

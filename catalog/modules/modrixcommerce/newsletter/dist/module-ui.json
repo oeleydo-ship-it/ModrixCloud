@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-DvomzkC2.js"
+    },
+    "slots": {
+        "SignupForm": "slots/SignupForm-CN4jVbti.js"
+    },
+    "css": [
+        "module-style-D2boTRXZ.css"
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-DXGYMl56.js"
+    },
+    "slots": {
+        "ProductReviews": "slots/ProductReviews-DyR_i5Y4.js",
+        "RatingStars": "slots/RatingStars-6WEZEYTH.js"
+    },
+    "css": [
+        "module-style-BHc4dLfr.css"
+    ]
+}

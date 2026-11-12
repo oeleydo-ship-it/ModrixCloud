@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-feiQUmMI.js"
+    },
+    "slots": {
+        "ProductDetails": "slots/ProductDetails-Cb48JPaG.js",
+        "ProductFieldsPanel": "slots/ProductFieldsPanel-BytvaQ8k.js"
+    },
+    "css": [
+        "module-style-CoPpofJF.css"
+    ]
+}

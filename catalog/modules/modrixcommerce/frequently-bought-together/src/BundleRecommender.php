@@ -167,7 +167,9 @@ final class BundleRecommender
                 'variants' => fn ($q) => $q->where('is_active', true),
                 'variants.prices',
                 'variants.stocks',
+                'variants.options',
                 'images' => fn ($q) => $q->limit(1),
+                'brand:id,name,slug',
                 'translations' => fn ($q) => $q->where('locale', app()->getLocale()),
             ])
             ->get()

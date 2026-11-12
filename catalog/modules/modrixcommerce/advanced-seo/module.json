@@ -3,7 +3,7 @@
     "name": "modrixcommerce/advanced-seo",
     "display_name": "Advanced SEO",
     "description": "Sets the storefront title and description on the home page, products, categories, brands and content pages for every theme. Adds canonical, Open Graph and product structured data, and submits the sitemap and updated URLs to Google Search Console.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "search",
     "accent": "#0f766e",

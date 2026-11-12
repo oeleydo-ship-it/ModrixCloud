@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-4RR9LZOF.js"
+    },
+    "slots": {
+        "GoogleAnalytics": "slots/GoogleAnalytics-CjigJomJ.js"
+    },
+    "css": [
+        "module-style-BBCo7EKx.css"
+    ]
+}

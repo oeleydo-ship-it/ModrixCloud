@@ -3,7 +3,7 @@
     "name": "modrixcommerce/tabby",
     "display_name": "Tabby: Buy Now, Pay Later",
     "description": "Let customers in the UAE and Saudi Arabia split payments with Tabby. Adds Tabby at checkout, promo messaging on product and cart pages, webhooks, capture and refunds.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#14b8a6",
@@ -34,15 +34,23 @@
         "slots": "resources/js/slots"
     },
     "content_security": {
-        "script-src": ["https://checkout.tabby.ai"],
-        "frame-src": ["https://checkout.tabby.ai", "https://checkout.tabby.sa"],
+        "script-src": [
+            "https://checkout.tabby.ai"
+        ],
+        "frame-src": [
+            "https://checkout.tabby.ai",
+            "https://checkout.tabby.sa"
+        ],
         "connect-src": [
             "https://checkout.tabby.ai",
             "https://checkout.tabby.sa",
             "https://api.tabby.ai",
             "https://api.tabby.sa"
         ],
-        "img-src": ["https://checkout.tabby.ai", "https://checkout.tabby.sa"],
+        "img-src": [
+            "https://checkout.tabby.ai",
+            "https://checkout.tabby.sa"
+        ],
         "form-action": [
             "https://checkout.tabby.ai",
             "https://checkout.tabby.sa"

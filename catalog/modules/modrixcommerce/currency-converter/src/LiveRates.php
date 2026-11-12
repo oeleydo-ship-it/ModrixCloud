@@ -17,6 +17,8 @@ final class LiveRates
 {
     public const CACHE = 'ecomodular.currency-converter.rates';
 
+    private bool $refreshPending = false;
+
     private const ENDPOINT = 'https://open.er-api.com/v6/latest/';
 
     public function __construct(
@@ -32,10 +34,52 @@ final class LiveRates
     public function forDisplay(): array
     {
         $base = $this->store->currency();
+        $memo = self::CACHE.'.display.'.$base;
+        if (request()->attributes->has($memo)) {
+            return request()->attributes->get($memo);
+        }
         $cached = $this->cached($base);
-        $rates = $cached !== null && $this->fresh($cached) ? $cached['rates'] : $this->refresh();
+        if ($cached !== null && $this->fresh($cached)) {
+            $rates = $cached['rates'];
+        } elseif ($cached !== null) {
+            // Stale: show the last rates now and refresh once the response is
+            // sent, so no shopper waits on the rates API (normally the
+            // scheduler refreshes; without it, pages used to time out here).
+            $rates = $cached['rates'];
+            if (Cache::add($this->retryKey($base), true, now()->addMinute())) {
+                $this->refreshAfterResponse();
+            }
+        } elseif (Cache::add($this->retryKey($base), true, now()->addMinute())) {
+            // Nothing to show yet: one bounded lookup (1s connect, 2s total),
+            // and only one per minute during an outage, even across pages.
+            $rates = $this->refresh();
+        } else {
+            $rates = [];
+        }
 
-        return array_intersect_key($rates, array_flip($this->codes()));
+        $rates = array_intersect_key($rates, array_flip($this->codes()));
+        request()->attributes->set($memo, $rates);
+
+        return $rates;
+    }
+
+    /**
+     * Refresh once this request's response is sent. The flag keeps a callback
+     * from running again when one app serves many requests (tests, Octane).
+     */
+    private function refreshAfterResponse(): void
+    {
+        if ($this->refreshPending) {
+            return;
+        }
+        $this->refreshPending = true;
+        app()->terminating(function (): void {
+            if (! $this->refreshPending) {
+                return;
+            }
+            $this->refreshPending = false;
+            $this->refresh();
+        });
     }
 
     /**
@@ -44,9 +88,10 @@ final class LiveRates
     public function refresh(): array
     {
         $base = $this->store->currency();
+        Cache::put($this->retryKey($base), true, now()->addMinute());
 
         try {
-            $response = Http::connectTimeout(2)->timeout(5)->acceptJson()->get(self::ENDPOINT.$base);
+            $response = Http::connectTimeout(1)->timeout(2)->acceptJson()->get(self::ENDPOINT.$base);
             $body = $response->json();
             if (! $response->ok() || ! is_array($body) || ($body['result'] ?? null) !== 'success' || ! is_array($body['rates'] ?? null)) {
                 return $this->remembered($base);
@@ -66,6 +111,8 @@ final class LiveRates
                 'fetched_at' => now()->getTimestamp(),
                 'rates' => $rates,
             ]);
+            Cache::forget($this->retryKey($base));
+            request()->attributes->remove(self::CACHE.'.display.'.$base);
 
             return $rates;
         } catch (Throwable) {
@@ -129,6 +176,11 @@ final class LiveRates
         $cached = $this->cached($base);
 
         return $cached === null ? [] : $cached['rates'];
+    }
+
+    private function retryKey(string $base): string
+    {
+        return self::CACHE.'.retry.'.$base;
     }
 
     private function format(mixed $rate): ?string

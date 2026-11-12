@@ -3,7 +3,7 @@
     "name": "modrixcommerce/telr",
     "display_name": "Telr",
     "description": "Accept cards and wallets on Telr's hosted payment page, or in an iframe on your store. Card data stays on Telr, so this store does not need PCI DSS certification for the checkout form.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#0e4c92",
@@ -31,9 +31,15 @@
         "pages": "resources/js/pages"
     },
     "content_security": {
-        "frame-src": ["https://secure.telr.com"],
-        "connect-src": ["https://secure.telr.com"],
-        "form-action": ["https://secure.telr.com"]
+        "frame-src": [
+            "https://secure.telr.com"
+        ],
+        "connect-src": [
+            "https://secure.telr.com"
+        ],
+        "form-action": [
+            "https://secure.telr.com"
+        ]
     },
     "admin_navigation": [
         {

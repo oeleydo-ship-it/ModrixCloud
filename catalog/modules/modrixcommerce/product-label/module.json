@@ -3,7 +3,7 @@
     "name": "modrixcommerce/product-label",
     "display_name": "Product Label",
     "description": "Highlights products with attractive labels — New, Sale, Low stock, Featured and your own custom badges — on every product card and product page, to draw the shopper's eye.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "tag",
     "accent": "#f43f5e",
@@ -108,9 +108,18 @@
             "label": "Badge style",
             "default": "solid",
             "options": [
-                { "value": "solid", "label": "Solid colour" },
-                { "value": "soft", "label": "Soft tint" },
-                { "value": "outline", "label": "Outline" }
+                {
+                    "value": "solid",
+                    "label": "Solid colour"
+                },
+                {
+                    "value": "soft",
+                    "label": "Soft tint"
+                },
+                {
+                    "value": "outline",
+                    "label": "Outline"
+                }
             ]
         },
         {
@@ -119,10 +128,22 @@
             "label": "Where labels sit on the image",
             "default": "top-left",
             "options": [
-                { "value": "top-left", "label": "Top left" },
-                { "value": "top-right", "label": "Top right" },
-                { "value": "bottom-left", "label": "Bottom left" },
-                { "value": "bottom-right", "label": "Bottom right" }
+                {
+                    "value": "top-left",
+                    "label": "Top left"
+                },
+                {
+                    "value": "top-right",
+                    "label": "Top right"
+                },
+                {
+                    "value": "bottom-left",
+                    "label": "Bottom left"
+                },
+                {
+                    "value": "bottom-right",
+                    "label": "Bottom right"
+                }
             ]
         },
         {

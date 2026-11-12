@@ -3,7 +3,7 @@
     "name": "modrixcommerce/paypal",
     "display_name": "PayPal",
     "description": "Accept PayPal and card payments on PayPal's checkout page. The customer approves the payment at PayPal, and this store captures it only after PayPal confirms the order.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#003087",

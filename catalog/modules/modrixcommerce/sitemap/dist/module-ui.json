@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-BN9wj6rW.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-BJ9t0E_I.css"
+    ]
+}

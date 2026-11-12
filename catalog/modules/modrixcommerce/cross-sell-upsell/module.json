@@ -3,7 +3,7 @@
     "name": "modrixcommerce/cross-sell-upsell",
     "display_name": "Cross-sell & Upsell",
     "description": "Rule-based offers that suggest add-ons and upgrades on the product page, in an add-to-cart pop-up, in the cart and as a one-click checkout add-on. Offers can carry a discount and show views, adds, orders and revenue.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "trending-up",
     "accent": "#0ea5e9",

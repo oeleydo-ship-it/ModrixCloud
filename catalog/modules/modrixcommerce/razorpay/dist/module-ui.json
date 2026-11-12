@@ -1,0 +1,11 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-CArrcZqk.js",
+        "storefront/checkout": "pages/storefront/checkout-BhKdDhPz.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-D96el2s_.css"
+    ]
+}

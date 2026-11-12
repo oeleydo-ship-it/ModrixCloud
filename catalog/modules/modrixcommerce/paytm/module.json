@@ -3,7 +3,7 @@
     "name": "modrixcommerce/paytm",
     "display_name": "Paytm Payment Gateway",
     "description": "Paytm All-in-One Payment Gateway for India with Paytm UPI, Paytm Wallet, Net Banking, credit/debit cards, and server checksum verification.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "wallet",
     "accent": "#00b9f5",
