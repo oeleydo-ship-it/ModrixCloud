@@ -60,11 +60,11 @@ class StripeGateway
     }
 
     /**
-     * Creates a Checkout session in subscription mode (monthly) and returns
-     * Stripe's URL. Uses the plan's Stripe Price when one is set, else a
-     * monthly price from the plan's amount and currency.
+     * Creates a Checkout session in subscription mode (monthly or yearly) and
+     * returns Stripe's URL. Uses the plan's Stripe Price for that interval when
+     * one is set, else a recurring price from the plan's amount and currency.
      *
-     * @param  array{name: string, price: string, currency: string, stripe_price: string}  $plan
+     * @param  array{name: string, interval: string, price: string, currency: string, stripe_price: string}  $plan  Subscriptions::pricing()
      */
     public function createSubscriptionSession(Subscription $subscription, array $plan, string $successUrl, string $cancelUrl): string
     {
@@ -76,7 +76,7 @@ class StripeGateway
             : ['quantity' => 1, 'price_data' => [
                 'currency' => strtolower($plan['currency']),
                 'unit_amount' => (int) round(((float) $plan['price']) * 100),
-                'recurring' => ['interval' => 'month'],
+                'recurring' => ['interval' => $plan['interval'] === 'year' ? 'year' : 'month'],
                 'product_data' => ['name' => $plan['name']],
             ]];
 
@@ -89,7 +89,7 @@ class StripeGateway
             'cancel_url' => $cancelUrl,
             ...(is_string($customer) ? ['customer' => $customer] : ['customer_email' => $subscription->user->email]),
             'client_reference_id' => 'subscription-'.$id,
-            'metadata' => ['subscription_id' => $id],
+            'metadata' => ['subscription_id' => $id, 'interval' => $plan['interval']],
             // Copied onto the Stripe subscription, so its events find this row
             // even when they arrive before checkout.session.completed.
             'subscription_data' => ['metadata' => ['subscription_id' => $id]],

@@ -8,7 +8,7 @@ use Illuminate\View\View;
 use Marketplace\Models\Setting;
 use Marketplace\Models\Subscription;
 
-/** The subscription plan (Admin → Pricing) and the list of subscriptions. */
+/** The subscription plan, monthly and yearly (Admin → Pricing), and the list of subscriptions. */
 class SubscriptionAdminController
 {
     public const STATUSES = ['active', 'trialing', 'past_due', 'pending', 'incomplete', 'unpaid', 'paused', 'canceled', 'expired'];
@@ -35,7 +35,12 @@ class SubscriptionAdminController
             'subscription_price' => ['required', 'numeric', 'min:0', 'max:99999'],
             'subscription_currency' => ['required', 'string', 'size:3', 'alpha'],
             'subscription_stripe_price' => ['nullable', 'string', 'max:255', 'regex:/^price_[A-Za-z0-9]+$/'],
-        ], ['subscription_stripe_price.regex' => 'The Stripe Price ID starts with price_.']);
+            'subscription_yearly_price' => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'subscription_stripe_price_yearly' => ['nullable', 'string', 'max:255', 'regex:/^price_[A-Za-z0-9]+$/'],
+        ], [
+            'subscription_stripe_price.regex' => 'The Stripe Price ID starts with price_.',
+            'subscription_stripe_price_yearly.regex' => 'The Stripe Price ID starts with price_.',
+        ]);
 
         $enabled = $request->boolean('subscription_enabled');
 
@@ -48,6 +53,9 @@ class SubscriptionAdminController
         Setting::put('subscription_price', number_format((float) $data['subscription_price'], 2, '.', ''));
         Setting::put('subscription_currency', strtoupper($data['subscription_currency']));
         Setting::put('subscription_stripe_price', (string) ($data['subscription_stripe_price'] ?? ''));
+        // 0 or blank: monthly only.
+        Setting::put('subscription_yearly_price', number_format((float) ($data['subscription_yearly_price'] ?? 0), 2, '.', ''));
+        Setting::put('subscription_stripe_price_yearly', (string) ($data['subscription_stripe_price_yearly'] ?? ''));
 
         return redirect('/admin/catalog')->with('notice', $enabled ? 'Subscription saved. Customers can subscribe.' : 'Subscription saved. New sign-ups are off; existing subscribers keep their access.');
     }

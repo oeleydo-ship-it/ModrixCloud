@@ -20,7 +20,7 @@ use Marketplace\Services\Subscriptions;
 /**
  * POST /stripe/webhook. Each event is handled once (webhook_events); repeats
  * and events about unknown orders are acknowledged without side effects.
- * Subscription events keep the monthly subscription (and its licenses) in sync.
+ * Subscription events keep the subscription (and its licenses) in sync.
  */
 class StripeWebhookController
 {
@@ -154,6 +154,18 @@ class StripeWebhookController
         // Newer API versions put the period on the subscription item.
         $periodEnd = $object['current_period_end'] ?? $object['items']['data'][0]['current_period_end'] ?? null;
         $endedAt = $object['ended_at'] ?? null;
+        // A switch between monthly and yearly (customer portal) changes the item's price.
+        $interval = $object['items']['data'][0]['price']['recurring']['interval'] ?? null;
+        $amount = $object['items']['data'][0]['price']['unit_amount'] ?? null;
+        $currency = $object['items']['data'][0]['price']['currency'] ?? null;
+
+        if (in_array($interval, ['month', 'year'], true)) {
+            $subscription->forceFill(['interval' => $interval]);
+
+            if (is_int($amount) && is_string($currency) && strlen($currency) === 3) {
+                $subscription->forceFill(['amount' => number_format($amount / 100, 2, '.', ''), 'currency' => strtoupper($currency)]);
+            }
+        }
 
         $subscription->forceFill([
             'stripe_subscription' => $stripeId,

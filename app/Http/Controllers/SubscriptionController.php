@@ -10,7 +10,7 @@ use Marketplace\Services\Subscriptions;
 use RuntimeException;
 
 /**
- * The monthly subscription for customers: Stripe Checkout in subscription
+ * The subscription for customers (billed monthly or yearly): Stripe Checkout in subscription
  * mode, the Stripe customer portal and cancelling. Access starts and ends
  * with the webhook, not with these redirects.
  */
@@ -24,6 +24,12 @@ class SubscriptionController
             return back()->withErrors(['subscription' => 'The subscription is not available right now.']);
         }
 
+        $interval = (string) $request->input('interval', 'month');
+
+        if (! in_array($interval, $subscriptions->intervals(), true)) {
+            return back()->withErrors(['subscription' => 'Choose monthly or yearly billing.']);
+        }
+
         if ($subscriptions->current($user) !== null) {
             return redirect('/account')->withErrors(['subscription' => 'You already have an active subscription.']);
         }
@@ -32,10 +38,11 @@ class SubscriptionController
             return back()->withErrors(['subscription' => 'Payments are not available yet. Please try again later.']);
         }
 
-        $plan = $subscriptions->plan();
+        $plan = $subscriptions->pricing($interval);
         $subscription = Subscription::query()->create([
             'user_id' => $user->id,
             'status' => 'pending',
+            'interval' => $plan['interval'],
             'amount' => $plan['price'],
             'currency' => $plan['currency'],
         ]);
@@ -70,7 +77,7 @@ class SubscriptionController
         }
     }
 
-    /** Cancels at the end of the paid month; licenses keep working until then. */
+    /** Cancels at the end of the paid month or year; licenses keep working until then. */
     public function cancel(Request $request, Subscriptions $subscriptions, StripeGateway $stripe): RedirectResponse
     {
         $subscription = $subscriptions->current($request->user());
@@ -90,6 +97,6 @@ class SubscriptionController
         $subscription->forceFill(['cancel_at_period_end' => true])->save();
         $until = $subscription->current_period_end?->toFormattedDateString();
 
-        return redirect('/account')->with('notice', 'Your subscription is cancelled'.($until ? ' and ends on '.$until : ' at the end of the paid month').'. Licenses from it keep working until then.');
+        return redirect('/account')->with('notice', 'Your subscription is cancelled'.($until ? ' and ends on '.$until : ' at the end of the paid '.($subscription->interval === 'year' ? 'year' : 'month')).'. Licenses from it keep working until then.');
     }
 }

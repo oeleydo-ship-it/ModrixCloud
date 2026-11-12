@@ -1,20 +1,28 @@
-@extends('layouts.site', ['title' => 'Monthly subscription'])
+@extends('layouts.site', ['title' => 'Subscription'])
 
 @section('content')
     <nav class="detail-breadcrumb" aria-label="Breadcrumb">
         <a href="{{ url('/') }}">Marketplace</a><span>/</span><span>Subscription</span>
     </nav>
     <section class="panel subscription-plan">
-        <span class="eyebrow">MONTHLY SUBSCRIPTION</span>
+        <span class="eyebrow">SUBSCRIPTION</span>
         <h1>{{ $plan['name'] }}</h1>
         @if ($available)
             <p class="detail-price">{{ $priceLabel }}</p>
+            @if (in_array('year', $intervals, true))
+                <p class="meta">or {{ $yearLabel }}{{ $saving > 0 ? ' — save '.$saving.'% with yearly billing' : '' }}</p>
+            @endif
             <p>Get a license key for every package below while you are subscribed. Each key works on one store at a time, like a bought one. Cancel any time; keys from the subscription stop working when it ends. Packages you bought individually are always yours.</p>
             @if ($current)
                 <p><strong>You are subscribed.</strong> Get your keys in your account.</p>
                 <p><a class="button" href="{{ url('/account') }}">Go to your account</a></p>
             @elseif (auth()->check())
-                <form method="post" action="{{ url('/subscribe') }}">@csrf<button type="submit">Subscribe · {{ $priceLabel }}</button></form>
+                <div class="actions">
+                    <form method="post" action="{{ url('/subscribe') }}">@csrf<input type="hidden" name="interval" value="month"><button type="submit">Subscribe monthly · {{ $priceLabel }}</button></form>
+                    @if (in_array('year', $intervals, true))
+                        <form method="post" action="{{ url('/subscribe') }}">@csrf<input type="hidden" name="interval" value="year"><button type="submit" class="secondary">Subscribe yearly · {{ $yearLabel }}</button></form>
+                    @endif
+                </div>
             @else
                 <p><a class="button" href="{{ url('/account/login?next='.rawurlencode('/subscription')) }}">Sign in to subscribe</a></p>
             @endif

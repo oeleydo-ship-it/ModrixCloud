@@ -150,7 +150,7 @@ class Catalog
         return $this->currency ??= strtoupper((string) (Setting::get('currency') ?: config('marketplace.currency', 'USD')));
     }
 
-    /** New customers can subscribe (Admin → Pricing → Monthly subscription). */
+    /** New customers can subscribe (Admin → Pricing → Subscription). */
     public function subscriptionOpen(): bool
     {
         return $this->subscriptionOpen ??= app(Subscriptions::class)->available();

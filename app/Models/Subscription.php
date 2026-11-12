@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * A customer's monthly subscription, kept in sync by the Stripe webhook.
+ * A customer's subscription (billed monthly or yearly), kept in sync by the Stripe webhook.
  *
  * @property int $id
  * @property int $user_id
  * @property string $status pending|active|trialing|past_due|incomplete|unpaid|canceled|expired
- * @property string $amount
+ * @property string $amount per interval
+ * @property string $interval month|year
  * @property string $currency
  * @property string|null $stripe_session
  * @property string|null $stripe_subscription
@@ -30,7 +31,7 @@ class Subscription extends Model
      */
     public const LIVE = ['active', 'trialing', 'past_due'];
 
-    protected $fillable = ['user_id', 'status', 'amount', 'currency', 'stripe_session', 'stripe_subscription', 'stripe_customer', 'current_period_end', 'cancel_at_period_end', 'ended_at'];
+    protected $fillable = ['user_id', 'status', 'interval', 'amount', 'currency', 'stripe_session', 'stripe_subscription', 'stripe_customer', 'current_period_end', 'cancel_at_period_end', 'ended_at'];
 
     protected function casts(): array
     {
@@ -40,6 +41,12 @@ class Subscription extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** "USD 19.00 / month". */
+    public function priceLabel(): string
+    {
+        return $this->currency.' '.$this->amount.' / '.($this->interval === 'year' ? 'year' : 'month');
     }
 
     public function isLive(): bool

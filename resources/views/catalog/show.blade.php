@@ -49,11 +49,11 @@
                 @if (! $product['premium'])
                     Start building without a package fee.
                 @elseif ($product['sold_individually'] && $product['in_subscription'])
-                    One-time purchase in {{ $currency }}, or included in the monthly subscription ({{ $plan }}).
+                    One-time purchase in {{ $currency }}, or included in the subscription ({{ $plan }}).
                 @elseif ($product['sold_individually'])
                     One-time purchase in {{ $currency }}.
                 @elseif ($product['in_subscription'])
-                    Available with the monthly subscription ({{ $plan }}).
+                    Available with the subscription ({{ $plan }}).
                 @else
                     Not available to new customers right now.
                 @endif

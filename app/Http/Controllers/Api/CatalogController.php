@@ -68,7 +68,7 @@ class CatalogController
             'price' => $package->price,
             'currency' => app(Catalog::class)->currency(),
             'is_free' => $package->is_free,
-            // Paid packages: bought on their own, included in the monthly subscription, or both.
+            // Paid packages: bought on their own, included in the subscription, or both.
             'sold_individually' => $package->buyable(),
             'in_subscription' => $package->inSubscription(),
             'featured' => $package->featured,

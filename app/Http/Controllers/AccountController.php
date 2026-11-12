@@ -32,7 +32,9 @@ class AccountController
             'included' => $subscription === null ? collect() : $catalog->published()->filter(fn ($p) => $p['model']->inSubscription())->sortBy('name')->values(),
             'subscription' => $subscription ?? $subscriptions->latest($user),
             'subscriptionLive' => $subscription !== null,
-            'plan' => $subscriptions->available() ? $subscriptions->priceLabel() : null,
+            'plan' => $subscriptions->available() ? $subscriptions->offerLabel() : null,
+            'intervals' => $subscriptions->intervals(),
+            'priceLabels' => ['month' => $subscriptions->priceLabel('month'), 'year' => $subscriptions->priceLabel('year')],
             'pendingSubscription' => $subscription === null && $request->boolean('subscribed'),
             'connections' => StoreConnection::query()->where('user_id', $user->id)->whereNull('revoked_at')->latest()->get(),
         ]);

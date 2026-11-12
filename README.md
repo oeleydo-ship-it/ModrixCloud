@@ -56,13 +56,16 @@ set up.
 `/stripe/webhook` marks the order paid, issues the license and emails the key.
 Refunds revoke the license.
 
-**Monthly subscription** (`/subscription`, `/subscribe`): customers can buy a
-paid package individually, subscribe monthly, or both. Under Admin → Pricing
-the admin turns the subscription on and sets its name, monthly price and
-currency, plus an optional Stripe recurring Price ID (`price_…`). Without a
-Price ID, checkout sends the price and currency as a monthly price. The same
-page, and each listing under Admin → Repository, says how every paid package
-is sold:
+**Subscription, monthly or yearly** (`/subscription`, `/subscribe`):
+customers can buy a paid package individually, subscribe, or both. Under
+Admin → Pricing the admin turns the subscription on and sets its name,
+currency, monthly price and an optional yearly price (0 means monthly only),
+plus optional Stripe recurring Price IDs (`price_…`) for each. Without a Price
+ID, checkout sends the price and currency as a monthly or yearly price.
+Customers choose monthly or yearly billing when they subscribe; the
+subscription page shows the yearly saving. Both give the same packages. The
+same page, and each listing under Admin → Repository, says how every paid
+package is sold:
 
 - sold individually (the default, also for packages that existed before);
 - included in the subscription only (no `/buy` checkout, no price needed);
@@ -71,12 +74,13 @@ is sold:
 New packages are sold individually until the admin includes them. Free
 packages stay free for everyone.
 
-Subscribing opens Stripe Checkout in `mode=subscription`. The webhook keeps
-the subscription in sync:
+Subscribing opens Stripe Checkout in `mode=subscription` with a monthly or
+yearly recurring price. The webhook keeps the subscription in sync:
 
 - `checkout.session.completed` (subscription mode) starts it;
-- `customer.subscription.updated` records status, renewal date and
-  cancel-at-period-end;
+- `customer.subscription.updated` records status, renewal date,
+  cancel-at-period-end and a switch between monthly and yearly made in the
+  Stripe customer portal;
 - `customer.subscription.deleted` ends it;
 - `invoice.payment_failed` marks it past due. Access continues while Stripe
   retries, until Stripe cancels the subscription or marks it unpaid.
@@ -93,7 +97,7 @@ Licenses bought individually are never affected, and buying a package held
 through the subscription makes its key permanent (`paid`). `/account` shows
 the subscription with **Manage billing** (the Stripe customer portal; turn
 it on in Stripe's billing settings) and **Cancel subscription** (at the end
-of the paid month). Admin → Subscriptions lists every subscription by
+of the paid month or year). Admin → Subscriptions lists every subscription by
 status, and the Orders and Licenses lists show subscriptions too. Add
 `customer.subscription.updated`, `customer.subscription.deleted` and
 `invoice.payment_failed` to the Stripe webhook's events (Admin → Settings →

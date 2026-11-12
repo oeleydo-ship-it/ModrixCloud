@@ -36,7 +36,7 @@
                 <a class="category-link{{ $filters['category'] === $category['slug'] ? ' active' : '' }}" href="{{ $browseUrl(['category' => $category['slug']]) }}">{{ $category['name'] }}<span>{{ $category['count'] }}</span></a>
             @endforeach
             @if ($subscriptionOpen)
-                <div class="sidebar-note subscription-note"><strong>Monthly subscription</strong><p>Every package marked “Included in subscription” for {{ $subscriptionPrice }}. Cancel any time.</p><a href="{{ url('/subscription') }}">See what is included →</a></div>
+                <div class="sidebar-note subscription-note"><strong>Subscription</strong><p>Every package marked “Included in subscription” for {{ $subscriptionPrice }}. Cancel any time.</p><a href="{{ url('/subscription') }}">See what is included →</a></div>
             @endif
             <div class="sidebar-note"><strong>Build your next store</strong><p>Find a theme for your brand. Add extensions as your store grows.</p><a href="{{ url('/submit') }}">Become a publisher →</a></div>
         </aside>

@@ -96,7 +96,7 @@ class SubscriptionTest extends TestCase
         $c = $this->paid('individual');
         $free = $this->package();
 
-        $this->actingAs($admin)->get('/admin/catalog')->assertOk()->assertSee('Monthly subscription')->assertSee('Subscription only');
+        $this->actingAs($admin)->get('/admin/catalog')->assertOk()->assertSee('Subscription (monthly or yearly)')->assertSee('Subscription only');
         $this->post('/admin/catalog', ['prices' => [
             $a->id => ['tier' => 'premium', 'price' => '49', 'sale' => 'individual'],
             $b->id => ['tier' => 'premium', 'price' => '', 'sale' => 'subscription'],
@@ -151,7 +151,7 @@ class SubscriptionTest extends TestCase
         $this->get('/?tier=subscription')->assertOk()->assertSee('Both Ways')->assertSee('Sub Only')->assertDontSee('Bought Only');
 
         $this->get('/item/acme-both')->assertOk()->assertSee('Included in subscription')->assertSee('USD 49.00')->assertSee('Buy now')->assertSee('Subscribe · USD 19.00 / month');
-        $this->get('/item/acme-sub')->assertOk()->assertSee('Available with the monthly subscription')->assertDontSee('Buy now');
+        $this->get('/item/acme-sub')->assertOk()->assertSee('Available with the subscription')->assertDontSee('Buy now');
         $this->get('/item/acme-one')->assertOk()->assertDontSee('Subscribe ·')->assertSee('One-time purchase in USD.')->assertSee('Buy now');
         $this->get('/subscription')->assertOk()->assertSee('Modrix Cloud Pro')->assertSee('Both Ways')->assertSee('Sub Only')->assertDontSee('Bought Only');
     }
@@ -195,6 +195,76 @@ class SubscriptionTest extends TestCase
         $this->actingAs($this->customer)->post('/subscribe')->assertRedirect('https://checkout.stripe.com/c/pay/cs_sub_9');
 
         Http::assertSent(fn ($request) => $request['line_items'][0]['price'] === 'price_123abc' && ! isset($request['line_items'][0]['price_data']));
+    }
+
+    public function test_yearly_billing_is_offered_when_it_has_a_price()
+    {
+        $this->actingAs($this->customer)->get('/subscription')->assertOk()->assertSee('Subscribe monthly')->assertDontSee('Subscribe yearly');
+        Http::fake();
+        $this->actingAs($this->customer)->post('/subscribe', ['interval' => 'year'])->assertSessionHasErrors('subscription');
+        Http::assertNothingSent();
+
+        Setting::put('subscription_yearly_price', '190.00');
+        $this->get('/subscription')->assertOk()->assertSee('Subscribe yearly · USD 190.00 / year')->assertSee('save 16%');
+        $this->paid('both', ['slug' => 'acme-both']);
+        $this->get('/item/acme-both')->assertSee('USD 19.00 / month or USD 190.00 / year');
+        $this->get('/account')->assertSee('Subscribe yearly · USD 190.00 / year');
+    }
+
+    public function test_subscribe_yearly_opens_a_yearly_stripe_checkout()
+    {
+        Setting::put('subscription_yearly_price', '190.00');
+        Http::fake(['api.stripe.com/v1/checkout/sessions' => Http::response(['id' => 'cs_year', 'url' => 'https://checkout.stripe.com/c/pay/cs_year'])]);
+
+        $this->actingAs($this->customer)->post('/subscribe', ['interval' => 'year'])->assertRedirect('https://checkout.stripe.com/c/pay/cs_year');
+
+        $subscription = Subscription::query()->firstOrFail();
+        $this->assertSame('year', $subscription->interval);
+        $this->assertSame('190.00', $subscription->amount);
+        Http::assertSent(fn ($request) => $request['mode'] === 'subscription'
+            && $request['line_items'][0]['price_data']['unit_amount'] === 19000
+            && $request['line_items'][0]['price_data']['recurring']['interval'] === 'year');
+    }
+
+    public function test_subscribe_yearly_uses_the_yearly_stripe_price()
+    {
+        Setting::put('subscription_yearly_price', '190.00');
+        Setting::put('subscription_stripe_price', 'price_month1');
+        Setting::put('subscription_stripe_price_yearly', 'price_year1');
+        Http::fake(['api.stripe.com/v1/checkout/sessions' => Http::response(['id' => 'cs_year', 'url' => 'https://checkout.stripe.com/c/pay/cs_year'])]);
+
+        $this->actingAs($this->customer)->post('/subscribe', ['interval' => 'year']);
+
+        Http::assertSent(fn ($request) => $request['line_items'][0]['price'] === 'price_year1');
+    }
+
+    public function test_a_yearly_subscription_gives_licenses_and_ends_like_a_monthly_one()
+    {
+        $package = $this->paid('subscription', ['slug' => 'acme-sub']);
+        Subscription::query()->create(['user_id' => $this->customer->id, 'status' => 'pending', 'interval' => 'year', 'amount' => '190.00', 'currency' => 'USD', 'stripe_session' => 'cs_y']);
+        $this->deliver(['id' => 'evt_y', 'type' => 'checkout.session.completed', 'data' => ['object' => ['id' => 'cs_y', 'mode' => 'subscription', 'payment_status' => 'paid', 'subscription' => 'sub_'.$this->customer->id, 'customer' => 'cus_'.$this->customer->id]]])->assertOk();
+
+        $this->actingAs($this->customer)->post('/account/licenses', ['product' => 'acme-sub'])->assertRedirect('/account');
+        $license = License::query()->where('package_id', $package->id)->firstOrFail();
+        $this->assertSame('subscription', $license->type);
+        $this->get('/account')->assertSee('USD 190.00 / year, billed yearly');
+
+        $this->cancel($this->customer);
+        $this->assertSame('expired', $license->fresh()->status);
+    }
+
+    public function test_switching_between_monthly_and_yearly_in_stripe_updates_the_subscription()
+    {
+        $subscription = $this->subscribe();
+        $item = ['current_period_end' => 1924992000, 'price' => ['unit_amount' => 19000, 'currency' => 'usd', 'recurring' => ['interval' => 'year']]];
+
+        $this->deliver(['id' => 'evt_switch', 'type' => 'customer.subscription.updated', 'data' => ['object' => $this->stripeSubscription($this->customer, 'active', ['items' => ['data' => [$item]]])]])->assertOk();
+
+        $subscription->refresh();
+        $this->assertSame('year', $subscription->interval);
+        $this->assertSame('190.00', $subscription->amount);
+        $this->actingAs($this->admin())->get('/admin/subscriptions')->assertSee('USD 190.00 / year');
+        $this->get('/admin/orders')->assertSee('Yearly subscription');
     }
 
     public function test_subscribers_cannot_subscribe_twice()
@@ -268,7 +338,7 @@ class SubscriptionTest extends TestCase
         $this->actingAs($this->customer)->post('/account/licenses', ['product' => 'acme-both'])->assertSessionHasErrors('product');
 
         $this->subscribe();
-        $this->actingAs($this->customer)->get('/account')->assertOk()->assertSee('Monthly subscription')->assertSee('Included in your subscription')->assertSee('Cancel subscription');
+        $this->actingAs($this->customer)->get('/account')->assertOk()->assertSee('billed monthly')->assertSee('Included in your subscription')->assertSee('Cancel subscription');
         $this->post('/account/licenses', ['product' => 'acme-both'])->assertRedirect('/account');
 
         $license = License::query()->where('package_id', $included->id)->firstOrFail();
@@ -434,6 +504,15 @@ class SubscriptionTest extends TestCase
         $this->assertSame('EUR', Setting::get('subscription_currency'));
         $this->assertSame('price_abc123', Setting::get('subscription_stripe_price'));
         $this->get('/admin/catalog')->assertOk()->assertSee('value="price_abc123"', false);
+        $this->assertSame('0.00', Setting::get('subscription_yearly_price'));
+
+        $this->post('/admin/subscription-plan', ['subscription_enabled' => '1', 'subscription_name' => 'Pro', 'subscription_price' => '25', 'subscription_currency' => 'EUR', 'subscription_yearly_price' => '250', 'subscription_stripe_price_yearly' => 'bad'])
+            ->assertSessionHasErrors('subscription_stripe_price_yearly');
+        $this->post('/admin/subscription-plan', ['subscription_enabled' => '1', 'subscription_name' => 'Pro', 'subscription_price' => '25', 'subscription_currency' => 'EUR', 'subscription_yearly_price' => '250', 'subscription_stripe_price_yearly' => 'price_year9'])
+            ->assertRedirect('/admin/catalog');
+        $this->assertSame('250.00', Setting::get('subscription_yearly_price'));
+        $this->assertSame('price_year9', Setting::get('subscription_stripe_price_yearly'));
+        $this->get('/admin/catalog')->assertOk()->assertSee('Yearly price')->assertSee('value="price_year9"', false);
 
         $this->post('/admin/subscription-plan', ['subscription_enabled' => '0', 'subscription_name' => 'Pro', 'subscription_price' => '25', 'subscription_currency' => 'EUR']);
         $this->assertFalse(Setting::get('subscription_enabled'));

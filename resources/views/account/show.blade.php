@@ -12,11 +12,11 @@
 
     @if ($subscription || $plan || $pendingSubscription)
         <section class="panel subscription-panel">
-            <h2>Monthly subscription</h2>
+            <h2>Subscription</h2>
             @if ($subscriptionLive)
                 <p>
                     <span class="status status-{{ $subscription->status }}">{{ ucfirst(str_replace('_', ' ', $subscription->status)) }}</span>
-                    {{ $subscription->currency }} {{ $subscription->amount }} / month.
+                    {{ $subscription->priceLabel() }}, billed {{ $subscription->interval === 'year' ? 'yearly' : 'monthly' }}.
                     @if ($subscription->current_period_end)
                         {{ $subscription->cancel_at_period_end ? 'Ends on' : 'Renews on' }} {{ $subscription->current_period_end->toFormattedDateString() }}.
                     @endif
@@ -28,7 +28,7 @@
                 <div class="actions">
                     <form method="post" action="{{ url('/account/subscription/portal') }}">@csrf<button class="secondary" type="submit">Manage billing</button></form>
                     @if (! $subscription->cancel_at_period_end)
-                        <form method="post" action="{{ url('/account/subscription/cancel') }}" onsubmit="return confirm('Cancel your subscription? Keys from it keep working until the end of the paid month.')">@csrf<button class="secondary" type="submit">Cancel subscription</button></form>
+                        <form method="post" action="{{ url('/account/subscription/cancel') }}" onsubmit="return confirm('Cancel your subscription? Keys from it keep working until the end of the paid period.')">@csrf<button class="secondary" type="submit">Cancel subscription</button></form>
                     @endif
                 </div>
             @elseif ($pendingSubscription)
@@ -40,7 +40,9 @@
                 @if ($plan)
                     <p>Subscribe for {{ $plan }} and get a key for every package included in the subscription.</p>
                     <div class="actions">
-                        <form method="post" action="{{ url('/subscribe') }}">@csrf<button type="submit">Subscribe</button></form>
+                        @foreach ($intervals as $interval)
+                            <form method="post" action="{{ url('/subscribe') }}">@csrf<input type="hidden" name="interval" value="{{ $interval }}"><button type="submit" @class(['secondary' => $interval === 'year'])>Subscribe {{ $interval === 'year' ? 'yearly' : 'monthly' }} · {{ $priceLabels[$interval] }}</button></form>
+                        @endforeach
                         <a class="button secondary" href="{{ url('/subscription') }}">See what is included</a>
                     </div>
                 @endif

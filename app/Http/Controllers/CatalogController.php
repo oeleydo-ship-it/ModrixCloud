@@ -57,7 +57,7 @@ class CatalogController
             'currency' => (string) (Setting::get('currency') ?: config('marketplace.currency')),
             'browseUrl' => $browseUrl,
             'subscriptionOpen' => $this->catalog->subscriptionOpen(),
-            'subscriptionPrice' => $subscriptions->priceLabel(),
+            'subscriptionPrice' => $subscriptions->offerLabel(),
         ]);
     }
 
@@ -77,7 +77,7 @@ class CatalogController
             'ownedVia' => $request->user() === null ? null : License::query()->where('user_id', $request->user()->id)->where('package_id', $product['id'])->where('status', 'active')->value('type'),
             // The customer's subscription covers this package: they can get the key now.
             'covered' => $subscriptions->covers($request->user(), $product['model']),
-            'plan' => $subscriptions->available() ? $subscriptions->priceLabel() : null,
+            'plan' => $subscriptions->available() ? $subscriptions->offerLabel() : null,
             'related' => $related,
             // The core this version needs, the first published core that meets it and the newest core.
             'core' => $cores->requirement((string) $product['platform_version'], null),
@@ -85,7 +85,7 @@ class CatalogController
         ]);
     }
 
-    /** The monthly subscription: price and every package it includes. */
+    /** The subscription: monthly and yearly prices and every package it includes. */
     public function subscription(Request $request, Subscriptions $subscriptions): View
     {
         $plan = $subscriptions->plan();
@@ -93,7 +93,10 @@ class CatalogController
         return view('catalog.subscription', [
             'plan' => $plan,
             'available' => $subscriptions->available(),
-            'priceLabel' => $subscriptions->priceLabel(),
+            'priceLabel' => $subscriptions->priceLabel('month'),
+            'yearLabel' => $subscriptions->priceLabel('year'),
+            'intervals' => $subscriptions->intervals(),
+            'saving' => $subscriptions->yearlySaving(),
             'current' => $subscriptions->current($request->user()),
             'included' => $this->catalog->published()->filter(fn ($p) => $p['model']->inSubscription())->sortBy('name')->values(),
         ]);

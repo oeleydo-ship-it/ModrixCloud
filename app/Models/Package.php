@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $currency
  * @property bool $is_free
  * @property bool $sold_individually paid packages: can be bought on their own (/buy/{slug})
- * @property bool $in_subscription paid packages: included in the monthly subscription
+ * @property bool $in_subscription paid packages: included in the subscription
  * @property string $status draft|published|hidden
  * @property bool $featured
  * @property string|null $demo_url
@@ -47,7 +47,7 @@ class Package extends Model
         return ! $this->is_free && $this->sold_individually !== false;
     }
 
-    /** A paid package that comes with the monthly subscription. */
+    /** A paid package that comes with the subscription. */
     public function inSubscription(): bool
     {
         return ! $this->is_free && $this->in_subscription === true;

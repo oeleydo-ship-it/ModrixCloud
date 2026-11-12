@@ -9,7 +9,7 @@ use Marketplace\Models\Subscription;
 use Marketplace\Models\User;
 
 /**
- * The monthly subscription: the plan (Admin → Pricing), who is subscribed,
+ * The subscription, billed monthly or yearly: the plan (Admin → Pricing), who is subscribed,
  * and the licenses it gives.
  *
  * A subscriber gets a license (type "subscription") for any package included
@@ -22,8 +22,11 @@ class Subscriptions
 {
     public function __construct(private readonly Licensing $licensing) {}
 
+    /** Billing intervals, as Stripe names them. */
+    public const INTERVALS = ['month', 'year'];
+
     /**
-     * @return array{enabled: bool, name: string, price: string, currency: string, stripe_price: string}
+     * @return array{enabled: bool, name: string, price: string, currency: string, stripe_price: string, yearly_price: string, stripe_price_yearly: string}
      */
     public function plan(): array
     {
@@ -32,26 +35,77 @@ class Subscriptions
             'name' => (string) (Setting::get('subscription_name') ?: 'Modrix Cloud subscription'),
             'price' => number_format((float) Setting::get('subscription_price', 0), 2, '.', ''),
             'currency' => strtoupper((string) (Setting::get('subscription_currency') ?: app(Catalog::class)->currency())),
-            // Optional recurring Price created in Stripe (price_…). Without it, checkout
-            // sends the amount and currency above as a monthly price.
+            // Optional recurring Prices created in Stripe (price_…). Without one, checkout
+            // sends the amount and currency above as a monthly (or yearly) price.
             'stripe_price' => (string) Setting::get('subscription_stripe_price', ''),
+            // Yearly billing is offered when it has a price; 0 means monthly only.
+            'yearly_price' => number_format((float) Setting::get('subscription_yearly_price', 0), 2, '.', ''),
+            'stripe_price_yearly' => (string) Setting::get('subscription_stripe_price_yearly', ''),
         ];
     }
 
-    /** New customers can subscribe: the plan is on and has a price. */
+    /** New customers can subscribe: the plan is on and has a monthly price. */
     public function available(): bool
     {
         $plan = $this->plan();
 
-        return $plan['enabled'] && ((float) $plan['price'] > 0 || $plan['stripe_price'] !== '');
+        return $plan['enabled'] && (float) $plan['price'] > 0;
     }
 
-    /** "USD 19.00 / month". */
-    public function priceLabel(): string
+    /**
+     * The billing intervals new customers can choose: month, and year when it has a price.
+     *
+     * @return list<string>
+     */
+    public function intervals(): array
+    {
+        if (! $this->available()) {
+            return [];
+        }
+
+        return (float) $this->plan()['yearly_price'] > 0 ? ['month', 'year'] : ['month'];
+    }
+
+    /**
+     * Amount, currency and Stripe Price for one interval.
+     *
+     * @return array{name: string, interval: string, price: string, currency: string, stripe_price: string}
+     */
+    public function pricing(string $interval): array
     {
         $plan = $this->plan();
+        $yearly = $interval === 'year';
 
-        return $plan['currency'].' '.$plan['price'].' / month';
+        return [
+            'name' => $plan['name'],
+            'interval' => $yearly ? 'year' : 'month',
+            'price' => $yearly ? $plan['yearly_price'] : $plan['price'],
+            'currency' => $plan['currency'],
+            'stripe_price' => $yearly ? $plan['stripe_price_yearly'] : $plan['stripe_price'],
+        ];
+    }
+
+    /** "USD 19.00 / month" or "USD 190.00 / year". */
+    public function priceLabel(string $interval = 'month'): string
+    {
+        $pricing = $this->pricing($interval);
+
+        return $pricing['currency'].' '.$pricing['price'].' / '.$pricing['interval'];
+    }
+
+    /** Every offered price: "USD 19.00 / month or USD 190.00 / year". */
+    public function offerLabel(): string
+    {
+        return implode(' or ', array_map(fn (string $i) => $this->priceLabel($i), $this->intervals() ?: ['month']));
+    }
+
+    /** Yearly saving against twelve monthly payments, in whole percent (0 when none). */
+    public function yearlySaving(): int
+    {
+        $plan = $this->plan();
+        $twelve = (float) $plan['price'] * 12;
+
+        return $twelve > 0 && (float) $plan['yearly_price'] > 0 ? max(0, (int) floor((1 - (float) $plan['yearly_price'] / $twelve) * 100)) : 0;
     }
 
     /** The customer's subscription that currently gives access, if any. */

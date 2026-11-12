@@ -2,7 +2,7 @@
 
 @section('admin')
     <h1>Subscriptions</h1>
-    <p class="meta">Monthly subscriptions, kept in sync by the Stripe webhook. Set the plan and which packages it includes under <a href="{{ url('/admin/catalog') }}">Pricing</a>.</p>
+    <p class="meta">Monthly and yearly subscriptions, kept in sync by the Stripe webhook. Set the plan and which packages it includes under <a href="{{ url('/admin/catalog') }}">Pricing</a>.</p>
     <nav class="tabs" aria-label="Subscription status">
         <a href="{{ url('/admin/subscriptions') }}" @if ($status === '') aria-current="page" @endif>All <span class="meta">{{ $counts->sum() }}</span></a>
         @foreach ($statuses as $value)
@@ -18,7 +18,7 @@
                 <tr>
                     <td>{{ $subscription->created_at->format('Y-m-d H:i') }}</td>
                     <td>{{ $subscription->user?->email }}</td>
-                    <td>{{ $subscription->currency }} {{ $subscription->amount }} / month</td>
+                    <td>{{ $subscription->priceLabel() }}</td>
                     <td>
                         <span class="status status-{{ $subscription->status }}">{{ ucfirst(str_replace('_', ' ', $subscription->status)) }}</span>
                         @if ($subscription->cancel_at_period_end && $subscription->isLive())<br><span class="meta">Cancels at period end</span>@endif
