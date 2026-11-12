@@ -42,6 +42,16 @@ download from `/download/{slug}`; paid ones for customers who own them.
 package or see the key of a bought one, and disconnect a store to move a key.
 One key per customer and package; each key is active on one store at a time.
 
+Admin → Settings → Email has **Require email verification for new accounts**
+(off by default). When it is on, a new customer gets an email with a signed
+link that works for 60 minutes. Until they open it they can sign in but only
+see a "check your email" page (`/account/verify-email`) with a resend button
+(one email a minute); licenses, checkout, store connections and publishing
+stay closed. Accounts that existed before, or registered while the option was
+off, are already verified, and admins are never held. Verification emails go
+through the SMTP settings on the same tab; the page warns while SMTP is not
+set up.
+
 **Checkout** (`/buy/{slug}`): Stripe Checkout. The signed webhook at
 `/stripe/webhook` marks the order paid, issues the license and emails the key.
 Refunds revoke the license.

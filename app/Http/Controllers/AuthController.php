@@ -9,6 +9,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Marketplace\Models\User;
+use Marketplace\Services\EmailVerification;
 
 /** Customer and publisher sign-in, registration and sign-out. */
 class AuthController
@@ -43,7 +44,7 @@ class AuthController
         return redirect(self::next($request));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, EmailVerification $verification): RedirectResponse
     {
         // Emails are stored lowercase, so sign-in and uniqueness ignore case on every database.
         $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
@@ -53,8 +54,23 @@ class AuthController
             'password' => ['required', 'confirmed', Password::min(10)],
         ]);
 
-        Auth::login(User::query()->create($data));
+        $user = User::query()->create($data);
+
+        // With verification off the account is ready at once, and stays usable if the option is turned on later.
+        if (! $verification->required()) {
+            $user->markEmailAsVerified();
+        }
+
+        Auth::login($user);
         $request->session()->regenerate();
+
+        if ($verification->blocks($user)) {
+            $sent = $verification->send($user);
+
+            return redirect('/account/verify-email')->with('notice', $sent
+                ? 'Your account is created. We sent a link to '.$user->email.' to confirm your email.'
+                : 'Your account is created, but the confirmation email could not be sent. Use the button below to try again.');
+        }
 
         return redirect(self::next($request))->with('notice', 'Your account is ready.');
     }

@@ -17,8 +17,15 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'password' => 'password',
+            'email_verified_at' => now(),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /** An account that has not confirmed its email yet. */
+    public function unverified(): static
+    {
+        return $this->state(['email_verified_at' => null]);
     }
 
     public function admin(): static

@@ -2,7 +2,10 @@
 
 namespace Marketplace\Providers;
 
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Pagination\Paginator;
+use Marketplace\Models\Setting;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Marketplace\Services\MailSettings;
@@ -36,5 +39,17 @@ class AppServiceProvider extends ServiceProvider
 
         // SMTP settings saved in the admin, applied before the first mailer is built.
         $this->app->afterResolving('mail.manager', fn () => $this->app->make(MailSettings::class)->apply());
+
+        // The email sent when "Require email verification for new accounts" is on.
+        VerifyEmail::toMailUsing(function (object $user, string $url) {
+            $name = (string) (Setting::get('catalog_name') ?: config('app.name'));
+
+            return (new MailMessage)
+                ->subject('Confirm your email for '.$name)
+                ->greeting('Hello '.$user->name.',')
+                ->line('Open the link below to confirm your email address and start using your '.$name.' account.')
+                ->action('Confirm email', $url)
+                ->line('The link works for 60 minutes. If you did not create an account, you can ignore this email.');
+        });
     }
 }

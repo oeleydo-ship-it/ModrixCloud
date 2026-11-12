@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Marketplace\Models\Setting;
+use Marketplace\Services\EmailVerification;
+use Marketplace\Services\MailSettings;
 use Marketplace\Services\SigningKey;
 use Marketplace\Services\StripeGateway;
 use Marketplace\Services\Uploads;
@@ -21,7 +23,9 @@ class SettingsController
 {
     public const TABS = ['general' => 'General', 'payments' => 'Payments', 'email' => 'Email', 'licensing' => 'Licensing'];
 
-    public function show(Request $request, SigningKey $key, StripeGateway $stripe): View
+    public const NO_SMTP_WARNING = 'SMTP is not set up, so verification emails can\'t be sent. New customers will be stuck on the "check your email" page until you save SMTP settings above.';
+
+    public function show(Request $request, SigningKey $key, StripeGateway $stripe, MailSettings $mail, EmailVerification $verification): View
     {
         $tab = array_key_exists((string) $request->query('tab'), self::TABS) ? (string) $request->query('tab') : 'general';
 
@@ -50,7 +54,10 @@ class SettingsController
                 'password_set' => (string) Setting::get('smtp_password', '') !== '',
                 'from' => (string) Setting::get('mail_from', ''),
                 'from_name' => (string) Setting::get('mail_from_name', ''),
+                'configured' => $mail->configured(),
             ],
+            'verification' => $verification->required(),
+            'noSmtpWarning' => self::NO_SMTP_WARNING,
             'signing' => ['public_key' => $key->publicKey(), 'key_id' => $key->keyId()],
         ]);
     }
@@ -122,6 +129,23 @@ class SettingsController
         }
 
         return redirect('/admin/general?tab=email')->with('notice', 'Email settings saved.');
+    }
+
+    /**
+     * "Require email verification for new accounts". Accounts that already exist
+     * are verified (see the migration and AuthController::store), so turning it on
+     * locks nobody out; admins are never held.
+     */
+    public function saveVerification(Request $request, MailSettings $mail): RedirectResponse
+    {
+        $on = $request->boolean('require_email_verification');
+        Setting::put(EmailVerification::SETTING, $on);
+
+        $redirect = redirect('/admin/general?tab=email')->with('notice', $on
+            ? 'Email verification is on. New accounts must confirm their email before using their account.'
+            : 'Email verification is off. New accounts can use their account right away.');
+
+        return $on && ! $mail->configured() ? $redirect->with('warning', self::NO_SMTP_WARNING) : $redirect;
     }
 
     /** Sends a test message to the signed-in admin. */

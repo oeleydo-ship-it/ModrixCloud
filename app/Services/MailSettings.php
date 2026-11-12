@@ -11,6 +11,16 @@ use Marketplace\Models\Setting;
  */
 class MailSettings
 {
+    /** Whether an SMTP host is saved, so the marketplace can actually deliver email. */
+    public function configured(): bool
+    {
+        try {
+            return (string) Setting::get('smtp_host', '') !== '';
+        } catch (QueryException) {
+            return false;
+        }
+    }
+
     public function apply(): void
     {
         try {

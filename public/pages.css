@@ -78,3 +78,8 @@ button.small, a.small { font-size:0.85rem; padding:0.3rem 0.7rem; }
 .pager-gap { display: inline-flex; align-items: center; padding: 0 4px; color: #5c6170; }
 .pager-count { margin-left: auto; color: #5c6170; }
 @media (max-width: 600px) { .pager-count { margin-left: 0; width: 100%; } }
+
+/* Email verification: "check your email" page and the admin setting. */
+.verify-signout { margin-top: 0.8rem; text-align: center; }
+.settings-warning { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: 12px; padding: 0.7rem 0.9rem; margin: 0 0 1rem; }
+.settings-section { margin-top: 2rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }

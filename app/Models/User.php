@@ -3,6 +3,7 @@
 namespace Marketplace\Models;
 
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,10 +17,11 @@ use Illuminate\Notifications\Notifiable;
  * @property string $name
  * @property string $email
  * @property bool $is_admin
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property \Illuminate\Support\Carbon|null $banned_at
  * @property string|null $ban_reason
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -30,7 +32,7 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_admin' => 'boolean', 'banned_at' => 'datetime'];
+        return ['password' => 'hashed', 'is_admin' => 'boolean', 'banned_at' => 'datetime', 'email_verified_at' => 'datetime'];
     }
 
     /** Stored lowercase so sign-in and uniqueness ignore case on every database. */

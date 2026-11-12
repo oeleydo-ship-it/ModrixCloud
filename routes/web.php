@@ -16,10 +16,12 @@ use Marketplace\Http\Controllers\PasswordResetController;
 use Marketplace\Http\Controllers\CatalogController;
 use Marketplace\Http\Controllers\ConnectController;
 use Marketplace\Http\Controllers\CheckoutController;
+use Marketplace\Http\Controllers\EmailVerificationController;
 use Marketplace\Http\Controllers\InstallController;
 use Marketplace\Http\Controllers\PublishController;
 use Marketplace\Http\Controllers\StripeWebhookController;
 use Marketplace\Http\Middleware\EnsureAdmin;
+use Marketplace\Http\Middleware\EnsureEmailVerified;
 
 // First-run setup; RequireInstallation closes it (404) once the app is installed.
 Route::get('install', [InstallController::class, 'show'])->name('install');
@@ -50,7 +52,15 @@ Route::middleware('guest')->group(function () {
 });
 Route::post('account/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Email verification (Admin → Settings → Email). The emailed link is signed, so it works without signing in.
+Route::get('account/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware('throttle:10,1')->name('verification.verify');
 Route::middleware('auth')->group(function () {
+    Route::get('account/verify-email', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::post('account/verify-email/resend', [EmailVerificationController::class, 'resend'])->middleware('throttle:6,1')->name('verification.send');
+});
+
+// While verification is required, unverified customers are sent to the "check your email" page.
+Route::middleware(['auth', EnsureEmailVerified::class])->group(function () {
     Route::get('account', [AccountController::class, 'show'])->name('account');
     Route::post('account/licenses', [AccountController::class, 'license'])->middleware('throttle:20,1');
     Route::post('account/licenses/release', [AccountController::class, 'release'])->middleware('throttle:20,1');
@@ -109,6 +119,7 @@ Route::prefix('admin')->group(function () {
         Route::post('stripe', [SettingsController::class, 'saveStripe']);
         Route::post('smtp', [SettingsController::class, 'saveSmtp']);
         Route::post('smtp/test', [SettingsController::class, 'testSmtp'])->middleware('throttle:5,1');
+        Route::post('verification', [SettingsController::class, 'saveVerification']);
 
         Route::get('licenses', [SalesController::class, 'licenses'])->name('admin.licenses');
         Route::post('licenses/{license}/release', [SalesController::class, 'release']);

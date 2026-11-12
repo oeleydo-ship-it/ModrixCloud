@@ -49,6 +49,20 @@
             <div class="wide"><button type="submit">Save email settings</button></div>
         </form>
         <form method="post" action="{{ url('/admin/smtp/test') }}">@csrf<button class="secondary" type="submit">Send a test email to {{ auth()->user()->email }}</button></form>
+
+        <section class="settings-section">
+            <h2>New accounts</h2>
+            @if (session('warning') || ! $smtp['configured'])
+                <p class="settings-warning" role="alert">{{ session('warning') ?: $noSmtpWarning }}</p>
+            @endif
+            <form method="post" action="{{ url('/admin/verification') }}" class="stack">
+                @csrf
+                <input type="hidden" name="require_email_verification" value="0">
+                <label class="check"><input type="checkbox" name="require_email_verification" value="1" @checked($verification)> Require email verification for new accounts</label>
+                <p class="meta">New customers get an email with a link and can't get licenses, buy or publish until they open it. Accounts that already exist keep working, and admins are never asked.</p>
+                <div><button type="submit">Save</button></div>
+            </form>
+        </section>
     @else
         <p>Stores verify license tokens and release files with this Ed25519 public key. In each store's <code>.env</code>, set <code>ECOMODULAR_MARKETPLACE_URL={{ url('/') }}</code> and add this key to <code>ECOMODULAR_MARKETPLACE_TRUSTED_KEYS</code> (keep any keys already there), then run <code>php artisan config:clear</code>.</p>
         <dl class="package-specs">
