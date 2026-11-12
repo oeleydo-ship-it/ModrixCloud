@@ -1,0 +1,28 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/category-tree.tsx": "src/category-tree-CjqnCTVs.js",
+        "src/components.tsx": "src/components-CVTII3sb.js",
+        "src/layout.tsx": "src/layout-D_To0-3o.js",
+        "src/mobile-navigation.tsx": "src/mobile-navigation-BwQi8jF0.js",
+        "src/recent.tsx": "src/recent-CbW35OT8.js",
+        "src/sections/apps.tsx": "src/sections/apps-Bc1VoeJW.js",
+        "src/sections/benefits.tsx": "src/sections/benefits-D_7a-k1s.js",
+        "src/sections/category-tiles.tsx": "src/sections/category-tiles-5YGsK524.js",
+        "src/sections/footer.tsx": "src/sections/footer-CwVzymhj.js",
+        "src/sections/header.tsx": "src/sections/header-DML0jLUV.js",
+        "src/sections/hero.tsx": "src/sections/hero-CGt1JYIB.js",
+        "src/sections/main-cart.tsx": "src/sections/main-cart-CjzhpEK-.js",
+        "src/sections/main-collection.tsx": "src/sections/main-collection-C9TnLdZY.js",
+        "src/sections/main-page.tsx": "src/sections/main-page-9pKKuOvi.js",
+        "src/sections/main-product.tsx": "src/sections/main-product-BLV_LZlv.js",
+        "src/sections/product-rail.tsx": "src/sections/product-rail-DBrkLCKt.js",
+        "src/sections/promotions.tsx": "src/sections/promotions-DwZROmTJ.js",
+        "src/sections/rich-text.tsx": "src/sections/rich-text-CgwQlSTJ.js",
+        "src/sections/topbar.tsx": "src/sections/topbar-sCEpmUvu.js",
+        "src/share-product.tsx": "src/share-product-CWq78chz.js"
+    },
+    "css": [
+        "package-style-C6E8C_Bd.css"
+    ]
+}

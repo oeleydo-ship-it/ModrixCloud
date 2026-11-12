@@ -1,0 +1,32 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/category-tree.tsx": "src/category-tree-B7fz7R6Y.js",
+        "src/components.tsx": "src/components-CvzhsKPe.js",
+        "src/layout.tsx": "src/layout-CURqtuKT.js",
+        "src/mobile-navigation.tsx": "src/mobile-navigation-DB2khXCd.js",
+        "src/recent.tsx": "src/recent-C2ZhRUPh.js",
+        "src/sections/apps.tsx": "src/sections/apps-DXXZbo2I.js",
+        "src/sections/baby-hero.tsx": "src/sections/baby-hero-BPvJx4gi.js",
+        "src/sections/benefits.tsx": "src/sections/benefits-BCGmGJyE.js",
+        "src/sections/category-tabs.tsx": "src/sections/category-tabs-CIY5cNrq.js",
+        "src/sections/collection-logos.tsx": "src/sections/collection-logos-CwmV6vum.js",
+        "src/sections/department-products.tsx": "src/sections/department-products-B8yf44Ep.js",
+        "src/sections/footer.tsx": "src/sections/footer-B4BGd6ru.js",
+        "src/sections/header.tsx": "src/sections/header-DFVrz22g.js",
+        "src/sections/main-cart.tsx": "src/sections/main-cart-D0QR3LQ2.js",
+        "src/sections/main-collection.tsx": "src/sections/main-collection-DsPi3q8o.js",
+        "src/sections/main-page.tsx": "src/sections/main-page-BFqCtxnX.js",
+        "src/sections/main-product.tsx": "src/sections/main-product-C71c9xE7.js",
+        "src/sections/newsletter.tsx": "src/sections/newsletter-ABwhSZh9.js",
+        "src/sections/product-shelf.tsx": "src/sections/product-shelf-CUsiA8Y_.js",
+        "src/sections/promo-strip.tsx": "src/sections/promo-strip-Cawtlkk2.js",
+        "src/sections/promotions.tsx": "src/sections/promotions-DOqWlvrt.js",
+        "src/sections/recent-products.tsx": "src/sections/recent-products-BGUw85hz.js",
+        "src/sections/rich-text.tsx": "src/sections/rich-text-DyQhdhZX.js",
+        "src/sections/testimonials.tsx": "src/sections/testimonials-CTIt--b_.js"
+    },
+    "css": [
+        "package-style-4cZETRfF.css"
+    ]
+}

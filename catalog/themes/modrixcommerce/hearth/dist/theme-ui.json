@@ -1,0 +1,16 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/cart.tsx": "src/cart-Bduh-kQ4.js",
+        "src/catalog.tsx": "src/catalog-Cw1_MDYJ.js",
+        "src/components.tsx": "src/components-Egml4pD9.js",
+        "src/footer.tsx": "src/footer-BHO7dyoq.js",
+        "src/header.tsx": "src/header-CqOm8JAv.js",
+        "src/index.tsx": "src/index-DUpHbXqh.js",
+        "src/product.tsx": "src/product-CxArnkCy.js"
+    },
+    "css": [
+        "package-style-Bq4PUMHT.css",
+        "style-CJdcqcZr.css"
+    ]
+}

@@ -1,6 +1,6 @@
 {
     "title": "Nord storefront",
-    "description": "Customize the reference campaigns, images and page layouts. Shared navigation, products, currencies and extensions come from EcoModular.",
+    "description": "Customize the reference campaigns, images and page layouts. Shared navigation, products, currencies and extensions come from Modrix Commerce.",
     "hide_core_fields": [
         "layout.header",
         "layout.footer",

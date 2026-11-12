@@ -1,0 +1,1 @@
+/* empty css                      */const{PlatformCartPage:e}=await __modrix.load(`@/pages/storefront/cart`),{jsx:t}=await __modrix.load(`react/jsx-runtime`);function n(n){return t(`div`,{className:`marketplace-cart`,children:t(e,{...n})})}export{n as default};

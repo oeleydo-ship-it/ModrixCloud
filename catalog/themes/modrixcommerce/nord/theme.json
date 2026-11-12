@@ -3,13 +3,16 @@
     "name": "modrixcommerce/nord",
     "display_name": "Nord",
     "description": "The NORD MagicPath reference: full fashion campaigns, editorial collections, six-card product rails, responsive catalog and product gallery, styled core bag and checkout, and extensible storefront slots.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",
     "author": "Modrix team",
     "license": "MIT",
-    "capabilities": ["home.sections", "demo_content"],
+    "capabilities": [
+        "home.sections",
+        "demo_content"
+    ],
     "assets": "assets",
     "screenshot": "assets/demo-preview.png",
     "design": {

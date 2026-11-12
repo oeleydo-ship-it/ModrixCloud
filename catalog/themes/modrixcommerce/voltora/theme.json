@@ -3,7 +3,7 @@
     "name": "modrixcommerce/voltora",
     "display_name": "Voltora",
     "description": "Voltora electronics storefront from MagicPath merrily-hour-1817. Yellow search header, blue actions, centered 1140px canvas, campaign carousel, collection tiles, four-column catalog and three-column product detail.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",

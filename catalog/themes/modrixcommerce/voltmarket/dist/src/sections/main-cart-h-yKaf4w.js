@@ -1,0 +1,1 @@
+import{u as e}from"../../chunks/components-qFkCR9kf.js";const{jsx:t,jsxs:n}=await __modrix.load(`react/jsx-runtime`),{PlatformCartPage:r}=await __modrix.load(`@/pages/storefront/cart`);function i({section:i,page:a}){return a?n(`section`,{className:`vm-frame vm-page`,children:[t(`h1`,{children:e(i.settings.heading)}),t(r,{...a})]}):null}export{i as default};

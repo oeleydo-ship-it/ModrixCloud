@@ -1,0 +1,1 @@
+export{t as default}from"../chunks/share-product-Ck04ssix.js";

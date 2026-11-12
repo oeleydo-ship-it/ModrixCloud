@@ -1,0 +1,111 @@
+{
+    "name": "Trending category tabs",
+    "settings": [
+        {
+            "type": "text",
+            "id": "heading",
+            "label": "Heading",
+            "default": "Search trending"
+        },
+        {
+            "type": "select",
+            "id": "tab_source",
+            "label": "Tabs show",
+            "options": [
+                {
+                    "value": "tags",
+                    "label": "Product tags"
+                },
+                {
+                    "value": "collections",
+                    "label": "Collection tab blocks"
+                }
+            ],
+            "default": "tags",
+            "info": "Each tag tab shows that tag's products. If the store has no tags yet, the collection tab blocks are shown."
+        },
+        {
+            "type": "tags",
+            "id": "tab_tags",
+            "label": "Tab tags",
+            "limit": 8,
+            "products": 16,
+            "fallback": "popular",
+            "info": "Leave empty to show the most-used tags."
+        }
+    ],
+    "blocks": [
+        {
+            "type": "collection",
+            "name": "Collection tab",
+            "settings": [
+                {
+                    "type": "text",
+                    "id": "label",
+                    "label": "Label",
+                    "default": ""
+                },
+                {
+                    "type": "select",
+                    "id": "icon",
+                    "label": "Icon",
+                    "options": [
+                        {
+                            "value": "bath",
+                            "label": "bath"
+                        },
+                        {
+                            "value": "baby",
+                            "label": "baby"
+                        },
+                        {
+                            "value": "moon",
+                            "label": "moon"
+                        },
+                        {
+                            "value": "shirt",
+                            "label": "shirt"
+                        },
+                        {
+                            "value": "milk",
+                            "label": "milk"
+                        },
+                        {
+                            "value": "toy",
+                            "label": "toy"
+                        },
+                        {
+                            "value": "home",
+                            "label": "home"
+                        },
+                        {
+                            "value": "heart",
+                            "label": "heart"
+                        },
+                        {
+                            "value": "star",
+                            "label": "star"
+                        }
+                    ],
+                    "default": "baby"
+                },
+                {
+                    "type": "collection",
+                    "id": "collection",
+                    "label": "Product collection",
+                    "products": 16,
+                    "fallback": "latest"
+                }
+            ]
+        }
+    ],
+    "max_blocks": 8,
+    "presets": [
+        {
+            "name": "Trending category tabs"
+        }
+    ],
+    "enabled_on": {
+        "templates": ["*"]
+    }
+}

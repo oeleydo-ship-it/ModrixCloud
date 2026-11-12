@@ -1,0 +1,1 @@
+export{t as GiftOptions,n as isFreeServiceSlot}from"../chunks/product-extras-CDmWUdss.js";

@@ -3,13 +3,17 @@
     "name": "modrixcommerce/pawzy",
     "display_name": "Pawzy",
     "description": "A playful pet shop with navy navigation, yellow accents, pet collections, editorial campaigns and a complete package-owned customizer.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",
     "author": "Modrix team",
     "license": "MIT",
-    "capabilities": ["home.sections", "custom_fonts", "demo_content"],
+    "capabilities": [
+        "home.sections",
+        "custom_fonts",
+        "demo_content"
+    ],
     "assets": "assets",
     "design": {
         "color.background": "#ffffff",
@@ -34,7 +38,7 @@
         "layout.grid_columns": "4",
         "layout.product_page": "split",
         "announcement": "Free shipping on orders over $100!",
-        "footer_text": "\u00c2\u00a9 Pawzy. All rights reserved.",
+        "footer_text": "Â© Pawzy. All rights reserved.",
         "style.general.body_size": "14",
         "style.general.heading_weight": "800",
         "contact_email": "",

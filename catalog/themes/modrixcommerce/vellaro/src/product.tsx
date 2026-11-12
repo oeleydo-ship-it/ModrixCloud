@@ -119,6 +119,9 @@ export default function VellaroProduct({
                             name={product.name}
                             image={product.images[0]?.url}
                             variant={variant}
+                            options={product.options}
+                            selected={selected}
+                            onOption={onOption}
                             hasOptions={product.options.length > 0}
                             showBuyButton={product.show_buy_button}
                         />

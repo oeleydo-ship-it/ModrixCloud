@@ -1,0 +1,1 @@
+const{jsx:e}=await __modrix.load(`react/jsx-runtime`),{ExtensionSlot:t}=await __modrix.load(`@/components/extensions/extension-slot`);function n({page:n}){return n&&Object.prototype.hasOwnProperty.call(n,`product`)?null:e(`div`,{className:`bl-frame`,children:e(t,{items:n?.slots})})}export{n as default};
