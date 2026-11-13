@@ -1,7 +1,7 @@
 {
     "sdk": 1,
     "pages": {
-        "admin/dashboard": "pages/admin/dashboard-pjoQ4lLu.js",
+        "admin/dashboard": "pages/admin/dashboard-Btx-mFUZ.js",
         "admin/detection-queue": "pages/admin/detection-queue-QWtiw_3v.js",
         "admin/ip-management": "pages/admin/ip-management-D3XT1LMX.js",
         "admin/reports": "pages/admin/reports-CykusgSO.js",
@@ -12,6 +12,6 @@
     },
     "slots": {},
     "css": [
-        "module-style-BY1Oalff.css"
+        "package-style-BY1Oalff.css"
     ]
 }

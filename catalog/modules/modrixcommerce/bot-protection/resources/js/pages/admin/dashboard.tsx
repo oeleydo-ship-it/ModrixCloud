@@ -381,7 +381,7 @@ export default function BotDashboard({
                                         key={idx}
                                         className="group relative flex h-full flex-1 flex-col items-center justify-end"
                                     >
-                                        <div className="flex w-full flex-col justify-end overflow-hidden rounded-t">
+                                        <div className="flex h-full w-full flex-col justify-end overflow-hidden rounded-t">
                                             {blockH > 0 && (
                                                 <div
                                                     style={{
@@ -463,7 +463,7 @@ export default function BotDashboard({
                                                 <div
                                                     className="h-full rounded-full bg-blue-600"
                                                     style={{
-                                                        width: `${Math.min(100, Math.max(8, (count / Math.max(1, ...Object.values(threatDistribution))) * 100))}%`,
+                                                        width: `${count > 0 ? Math.min(100, Math.max(8, (count / Math.max(1, ...Object.values(threatDistribution))) * 100)) : 0}%`,
                                                     }}
                                                 />
                                             </div>
