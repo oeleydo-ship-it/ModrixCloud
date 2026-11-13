@@ -1,0 +1,24 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-CWcrhZQ_.js",
+        "storefront/catalog": "pages/storefront/catalog-C7ousDKl.js",
+        "storefront/dashboard": "pages/storefront/dashboard-C09v8j70.js",
+        "storefront/login": "pages/storefront/login-CeHKKL8W.js",
+        "storefront/register": "pages/storefront/register-CtmhxF_7.js",
+        "storefront/vendor-store": "pages/storefront/vendor-store-CW9RlGtk.js",
+        "storefront/vendors": "pages/storefront/vendors-DR2Ay9vd.js"
+    },
+    "slots": {
+        "AdminProductVendorPanel": "slots/AdminProductVendorPanel-DiHcX0vm.js",
+        "FeaturedVendorsBlock": "slots/FeaturedVendorsBlock-D5Z3cXqX.js",
+        "MarketplaceCatalogStripSlot": "slots/MarketplaceCatalogStripSlot-DzKOXx9Q.js",
+        "MarketplaceFooterLinksSlot": "slots/MarketplaceFooterLinksSlot-DAF2DM-G.js",
+        "MultiVendorOverviewWidget": "slots/MultiVendorOverviewWidget-D81TTAh1.js",
+        "OrderVendorsSlot": "slots/OrderVendorsSlot-BSRxZLq6.js",
+        "ProductVendorBoxSlot": "slots/ProductVendorBoxSlot-CSXYGfUQ.js"
+    },
+    "css": [
+        "package-style-B5q4YbLM.css"
+    ]
+}
