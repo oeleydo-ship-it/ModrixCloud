@@ -95,3 +95,8 @@ button.small, a.small { font-size:0.85rem; padding:0.3rem 0.7rem; }
 .status-trialing { background:#dcfce7; color:#166534; }
 .status-past_due, .status-incomplete, .status-paused, .status-pending { background:#fef3c7; color:#92400e; }
 .status-canceled, .status-unpaid { background:#fee2e2; color:#991b1b; }
+
+/* Delete package on the repository edit page */
+.danger-zone { margin-top: 32px; padding: 20px; border: 1px solid #e8bac5; border-radius: 14px; background: #fff; }
+.danger-zone h2 { margin-top: 0; color: #b03f59; }
+.danger-zone form { margin-top: 12px; }

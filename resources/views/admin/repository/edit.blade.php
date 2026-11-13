@@ -81,4 +81,21 @@
             </table>
         </div>
     @endif
+
+    @unless ($new)
+        @php($licenseCount = \Marketplace\Models\License::query()->where('package_id', $package->id)->count())
+        @php($hasOrders = \Marketplace\Models\Order::query()->where('package_id', $package->id)->exists())
+        <section class="danger-zone">
+            <h2>Delete package</h2>
+            @if ($hasOrders)
+                <p class="meta">This package has orders, so it cannot be deleted; that keeps the sales records and buyers' licenses. Set its status to Hidden to remove it from the catalog.</p>
+            @else
+                <p class="meta">Removes the listing, {{ $releases->count() }} {{ \Illuminate\Support\Str::plural('release', $releases->count()) }} and their files, and {{ $licenseCount }} {{ \Illuminate\Support\Str::plural('license key', $licenseCount) }}. Stores that installed it stop getting its updates. This cannot be undone. To only take it off the catalog, set its status to Hidden instead.</p>
+                <form method="post" action="{{ url('/admin/repository/'.$package->slug.'/delete') }}" onsubmit="return confirm(@js('Delete '.$package->name.' ('.$package->identifier.') and its '.$licenseCount.' license keys? This cannot be undone.'))">
+                    @csrf
+                    <button class="danger" type="submit">Delete package</button>
+                </form>
+            @endif
+        </section>
+    @endunless
 @endsection

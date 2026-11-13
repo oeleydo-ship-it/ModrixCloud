@@ -70,6 +70,43 @@ class AdminTest extends TestCase
             ->assertSee('rel="prev"', false);
     }
 
+    public function test_deleting_a_package_removes_it_with_its_releases_licenses_and_files()
+    {
+        $admin = $this->admin();
+        $package = $this->package(['identifier' => 'acme/gone', 'slug' => 'acme-gone', 'name' => 'Gone']);
+        $zip = $this->packageZip('acme/gone', '1.0.0');
+        $release = app(\Marketplace\Services\Releases::class)->publish($package, $zip->getRealPath(), '1.0.0', '^1.0');
+        $file = app(\Marketplace\Services\Releases::class)->path($release);
+        License::query()->create(['user_id' => $this->customer()->id, 'package_id' => $package->id, 'key' => 'MRX-GGGGG-GGGGG-GGGGG-GGGGG', 'type' => 'free', 'status' => 'active']);
+        $this->assertFileExists($file);
+
+        $this->actingAs($admin)->get('/admin/repository')->assertSee('/admin/repository/acme-gone/delete', false);
+        $this->get('/admin/repository/acme-gone')->assertSee('Delete package')->assertSee('1 license key');
+
+        $this->post('/admin/repository/acme-gone/delete')
+            ->assertRedirect('/admin/repository')
+            ->assertSessionHas('notice', 'Gone (acme/gone) was deleted.');
+
+        $this->assertNull(Package::query()->find($package->id));
+        $this->assertSame(0, License::query()->count());
+        $this->assertSame(0, \Marketplace\Models\PackageRelease::query()->count());
+        $this->assertFileDoesNotExist($file);
+    }
+
+    public function test_a_package_with_orders_cannot_be_deleted_and_customers_cannot_delete()
+    {
+        $package = $this->package(['slug' => 'acme-sold', 'is_free' => false, 'price' => '9.00']);
+        $buyer = $this->customer();
+        \Marketplace\Models\Order::query()->create(['user_id' => $buyer->id, 'package_id' => $package->id, 'amount' => '9.00', 'currency' => 'USD', 'status' => 'paid']);
+
+        $this->actingAs($buyer)->post('/admin/repository/acme-sold/delete');
+        $this->assertNotNull($package->fresh());
+
+        $this->actingAs($this->admin())->get('/admin/repository/acme-sold')->assertSee('has orders, so it cannot be deleted');
+        $this->post('/admin/repository/acme-sold/delete')->assertSessionHasErrors('delete');
+        $this->assertNotNull($package->fresh());
+    }
+
     public function test_editing_a_package_and_adding_one()
     {
         $admin = $this->admin();

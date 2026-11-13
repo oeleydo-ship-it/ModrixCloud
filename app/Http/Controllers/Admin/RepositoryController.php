@@ -171,6 +171,36 @@ class RepositoryController
         return redirect('/admin/repository/'.$package->slug)->with('notice', 'Package saved.');
     }
 
+    /**
+     * Deletes a package with its releases, categories and licenses, and removes
+     * its stored files. A package with orders is kept, so sales records and
+     * buyers' licenses survive: hide it instead.
+     */
+    public function destroy(string $slug, Releases $releases, Uploads $uploads): RedirectResponse
+    {
+        $package = Package::query()->where('slug', $slug)->firstOrFail();
+
+        if (Order::query()->where('package_id', $package->id)->exists()) {
+            return back()->withErrors(['delete' => $package->name.' has orders, so it cannot be deleted. Set its status to Hidden to remove it from the catalog.']);
+        }
+
+        $files = $package->releases()->get()->map(fn (PackageRelease $release) => $releases->path($release))->all();
+
+        if ($package->thumbnail_path) {
+            $files[] = $uploads->path($package->thumbnail_path);
+        }
+
+        DB::transaction(fn () => $package->delete());
+
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                @unlink($file);
+            }
+        }
+
+        return redirect('/admin/repository')->with('notice', $package->name.' ('.$package->identifier.') was deleted.');
+    }
+
     /** Release history across packages. */
     public function updates(): View
     {

@@ -28,7 +28,7 @@
     </form>
     <div class="table-wrap">
         <table>
-            <thead><tr><th>Package</th><th>Type</th><th>Status</th><th>Price</th><th>Version</th></tr></thead>
+            <thead><tr><th>Package</th><th>Type</th><th>Status</th><th>Price</th><th>Version</th><th><span class="sr-only">Actions</span></th></tr></thead>
             <tbody>
             @forelse ($packages as $package)
                 <tr>
@@ -37,9 +37,15 @@
                     <td><span class="status status-{{ $package->status }}">{{ ucfirst($package->status) }}</span></td>
                     <td>{{ $package->is_free ? 'Free' : app(\Marketplace\Services\Catalog::class)->currency().' '.$package->price }}</td>
                     <td>{{ $package->version }}</td>
+                    <td>
+                        <form method="post" action="{{ url('/admin/repository/'.$package->slug.'/delete') }}" onsubmit="return confirm(@js('Delete '.$package->name.' ('.$package->identifier.')? Its releases, files and license keys are removed and stores stop getting its updates. This cannot be undone.'))">
+                            @csrf
+                            <button class="danger small" type="submit">Delete</button>
+                        </form>
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="meta">No packages found.</td></tr>
+                <tr><td colspan="6" class="meta">No packages found.</td></tr>
             @endforelse
             </tbody>
         </table>
