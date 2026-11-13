@@ -27,6 +27,13 @@ import { themeCatalog } from '@/lib/theme-pages';
 import { cn } from '@/lib/utils';
 import type { ListingProps } from '@/pages/storefront/listing';
 
+type PageLink = { url: string | null; label: string; active: boolean };
+
+/** Laravel's paginator also sends its page links; the shared Paginated type leaves them out. */
+function pageLinks(products: ListingProps['products']): PageLink[] {
+    return (products as { links?: PageLink[] }).links ?? [];
+}
+
 export interface MarketplaceDepartmentFacet {
     id: number;
     name: string;
@@ -793,7 +800,7 @@ function ThemeFallbackCatalog({
 
                 {products.last_page > 1 && (
                     <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2">
-                        {products.links.map((link, idx) => {
+                        {pageLinks(products).map((link, idx) => {
                             const text = link.label
                                 .replace(/&laquo;\s*/gi, '‹ ')
                                 .replace(/\s*&raquo;/gi, ' ›')

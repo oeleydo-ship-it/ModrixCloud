@@ -2,11 +2,11 @@
     "sdk": 1,
     "pages": {
         "admin/index": "pages/admin/index-CWcrhZQ_.js",
-        "storefront/catalog": "pages/storefront/catalog-C7ousDKl.js",
+        "storefront/catalog": "pages/storefront/catalog-XOh_vWju.js",
         "storefront/dashboard": "pages/storefront/dashboard-C09v8j70.js",
         "storefront/login": "pages/storefront/login-CeHKKL8W.js",
         "storefront/register": "pages/storefront/register-CtmhxF_7.js",
-        "storefront/vendor-store": "pages/storefront/vendor-store-CW9RlGtk.js",
+        "storefront/vendor-store": "pages/storefront/vendor-store-CGXFTXPw.js",
         "storefront/vendors": "pages/storefront/vendors-DR2Ay9vd.js"
     },
     "slots": {

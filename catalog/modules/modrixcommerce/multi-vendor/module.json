@@ -3,7 +3,7 @@
     "name": "modrixcommerce/multi-vendor",
     "display_name": "Multi-Vendor Marketplace (Vendors, KYB Verification, Seller Catalog & Payouts)",
     "description": "Transform your store into a full Multi-Vendor Marketplace with public vendor registration, KYB/KYC business verification badges, dedicated vendor product catalogs and storefronts, automatic order commission splitting, and store-to-vendor payouts.",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "type": "module",
     "icon": "store",
     "accent": "#059669",
