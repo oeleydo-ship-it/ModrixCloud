@@ -42,8 +42,23 @@ class Releases
 
         $release->setRelation('package', $package);
         $this->setPlatformVersion($release, $platformVersion);
+        $this->syncListing($package);
 
         return $release;
+    }
+
+    /**
+     * Keeps the listing's version on the newest release. Publishing an older
+     * version (the bundled catalog lagging behind an uploaded update) must not
+     * make the repository show a lower version than stores are offered.
+     */
+    public function syncListing(Package $package): void
+    {
+        $newest = $package->unsetRelation('releases')->latestRelease();
+
+        if ($newest !== null && $package->version !== $newest->version) {
+            $package->forceFill(['version' => $newest->version, 'platform_version' => $newest->platform_version])->save();
+        }
     }
 
     /**

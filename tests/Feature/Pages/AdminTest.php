@@ -70,6 +70,20 @@ class AdminTest extends TestCase
             ->assertSee('rel="prev"', false);
     }
 
+    public function test_publishing_an_older_release_keeps_the_listing_on_the_newest_version()
+    {
+        $releases = app(\Marketplace\Services\Releases::class);
+        $package = $this->package(['identifier' => 'acme/bot', 'slug' => 'acme-bot', 'version' => '1.0.0']);
+
+        $releases->publish($package, $this->packageZip('acme/bot', '1.0.2')->getRealPath(), '1.0.2', '^1.0');
+        // The bundled catalog still ships 1.0.0; the seeder sets the listing to it before publishing.
+        $package->fill(['version' => '1.0.0'])->save();
+        $releases->publish($package, $this->packageZip('acme/bot', '1.0.0')->getRealPath(), '1.0.0', '^1.0');
+
+        $this->assertSame('1.0.2', $package->fresh()->version);
+        $this->actingAs($this->admin())->get('/admin/repository?q=acme/bot')->assertSee('1.0.2');
+    }
+
     public function test_deleting_a_package_removes_it_with_its_releases_licenses_and_files()
     {
         $admin = $this->admin();
