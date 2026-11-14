@@ -3,7 +3,7 @@
     "name": "modrixcommerce/instamojo",
     "display_name": "Instamojo Payments",
     "description": "Instamojo payment gateway for India with UPI, Cards, Net Banking, Wallets, and Payment Request API.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#4b68ff",

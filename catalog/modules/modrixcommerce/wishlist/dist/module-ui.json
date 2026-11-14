@@ -1,0 +1,16 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-BQlrmAaL.js",
+        "admin/settings": "pages/admin/settings-1prlnKo5.js",
+        "storefront/index": "pages/storefront/index-oFioAuvR.js",
+        "storefront/shared": "pages/storefront/shared-DwtcH8cf.js"
+    },
+    "slots": {
+        "WishlistButton": "slots/WishlistButton-B9l9a7gH.js",
+        "WishlistHeaderIcon": "slots/WishlistHeaderIcon-DvlkrLqy.js"
+    },
+    "css": [
+        "module-style-QqtpLywI.css"
+    ]
+}

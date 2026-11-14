@@ -3,13 +3,16 @@
     "name": "modrixcommerce/vellaro",
     "display_name": "Vellaro Fashion",
     "description": "Monochrome fashion storefront from the MagicPath Vellaro reference. Campaign banners, editorial collections, five-product rows and a four-column catalog, connected to platform commerce.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",
     "author": "Modrix team",
     "license": "MIT",
-    "capabilities": ["home.sections", "demo_content"],
+    "capabilities": [
+        "home.sections",
+        "demo_content"
+    ],
     "assets": "assets",
     "screenshot": "assets/demo-preview.png",
     "design": {

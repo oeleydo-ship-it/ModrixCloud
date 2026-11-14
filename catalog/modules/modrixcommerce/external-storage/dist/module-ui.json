@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-B-ihV2jR.js"
+    },
+    "slots": {
+        "AdminProductStoragePanel": "slots/AdminProductStoragePanel-DjmmMQwy.js",
+        "ProductExternalMediaSlot": "slots/ProductExternalMediaSlot-CaFQFhNj.js"
+    },
+    "css": [
+        "module-style-zo1CuVnD.css"
+    ]
+}

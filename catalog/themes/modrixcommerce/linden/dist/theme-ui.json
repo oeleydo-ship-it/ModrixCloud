@@ -1,0 +1,28 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/category-tree.tsx": "src/category-tree-DFfLD14L.js",
+        "src/components.tsx": "src/components-88dgXL0g.js",
+        "src/layout.tsx": "src/layout-BDHVIPn8.js",
+        "src/mobile-navigation.tsx": "src/mobile-navigation-BTxv5zFz.js",
+        "src/recent.tsx": "src/recent-1xHCYtYz.js",
+        "src/sections/apps.tsx": "src/sections/apps-vZHxhfmE.js",
+        "src/sections/editorial.tsx": "src/sections/editorial-Dsooi2hR.js",
+        "src/sections/footer.tsx": "src/sections/footer-BKj0GgC5.js",
+        "src/sections/header.tsx": "src/sections/header-SrgdIg7v.js",
+        "src/sections/hero.tsx": "src/sections/hero-gl1Y-4dN.js",
+        "src/sections/journal.tsx": "src/sections/journal-DFCWUB4k.js",
+        "src/sections/main-cart.tsx": "src/sections/main-cart-BrIUynsz.js",
+        "src/sections/main-collection.tsx": "src/sections/main-collection-S4Z5CciV.js",
+        "src/sections/main-page.tsx": "src/sections/main-page-bA7y0dyh.js",
+        "src/sections/main-product.tsx": "src/sections/main-product-kUjnphB1.js",
+        "src/sections/product-rail.tsx": "src/sections/product-rail-vJRSn-88.js",
+        "src/sections/ranges.tsx": "src/sections/ranges-taEXeklA.js",
+        "src/sections/recently-viewed.tsx": "src/sections/recently-viewed-CBQfd7_g.js",
+        "src/sections/values.tsx": "src/sections/values-BTfaSu5f.js",
+        "src/share-product.tsx": "src/share-product-CWNHRuKX.js"
+    },
+    "css": [
+        "package-style-DQF20gfI.css"
+    ]
+}

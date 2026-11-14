@@ -3,7 +3,7 @@
     "name": "modrixcommerce/google-analytics",
     "display_name": "Google Analytics",
     "description": "Connects your storefront to Google Analytics 4. Loads the Google tag on every storefront page, records a page view on each visit and navigation, and adds the tag's hosts to the Content-Security-Policy.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "chart-column",
     "accent": "#4285f4",
@@ -39,7 +39,9 @@
         "slots": "resources/js/slots"
     },
     "content_security": {
-        "script-src": ["https://www.googletagmanager.com"],
+        "script-src": [
+            "https://www.googletagmanager.com"
+        ],
         "img-src": [
             "https://www.google-analytics.com",
             "https://www.googletagmanager.com"

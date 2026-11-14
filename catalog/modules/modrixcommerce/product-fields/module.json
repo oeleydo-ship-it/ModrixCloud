@@ -3,7 +3,7 @@
     "name": "modrixcommerce/product-fields",
     "display_name": "Product Fields",
     "description": "Custom fields for products: define fields such as Material, Care instructions or Warranty (text, long text, number, yes/no, date, dropdown or link), fill them in on each product, and choose which ones show as a details list on the product page.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "list-plus",
     "accent": "#6366f1",

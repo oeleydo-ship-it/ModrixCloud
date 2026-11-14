@@ -3,7 +3,7 @@
     "name": "modrixcommerce/tiered-pricing",
     "display_name": "Tiered Pricing & Volume Discounts",
     "description": "Increase average order value with volume discounts, tiered quantity-break pricing tables, and automatic bulk cart discounts.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "layers",
     "accent": "#2563eb",

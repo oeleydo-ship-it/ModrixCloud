@@ -1,0 +1,17 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/dashboard": "pages/admin/dashboard-Btx-mFUZ.js",
+        "admin/detection-queue": "pages/admin/detection-queue-QWtiw_3v.js",
+        "admin/ip-management": "pages/admin/ip-management-D3XT1LMX.js",
+        "admin/reports": "pages/admin/reports-CykusgSO.js",
+        "admin/rules-engine": "pages/admin/rules-engine-B7Fr8Go6.js",
+        "admin/security-center": "pages/admin/security-center-c9R9nj0G.js",
+        "admin/settings": "pages/admin/settings-4P-j6WDj.js",
+        "admin/traffic-analytics": "pages/admin/traffic-analytics-CD3BtRkj.js"
+    },
+    "slots": {},
+    "css": [
+        "package-style-BY1Oalff.css"
+    ]
+}

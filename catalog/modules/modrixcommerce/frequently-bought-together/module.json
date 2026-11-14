@@ -3,7 +3,7 @@
     "name": "modrixcommerce/frequently-bought-together",
     "display_name": "Frequently Bought Together",
     "description": "Shows a bundle of products that customers often buy together on each product page, learned from real order history. Shoppers tick the extras and add the whole set to the cart in one go.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "package-plus",
     "accent": "#6366f1",

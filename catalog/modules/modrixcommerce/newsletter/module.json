@@ -3,7 +3,7 @@
     "name": "modrixcommerce/newsletter",
     "display_name": "Newsletter & Email Marketing",
     "description": "Complete email marketing system with audience segmentation, customer grouping, targeted broadcast campaigns, App Core SMTP integration, and compliant storefront sign-ups.",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "type": "module",
     "icon": "mail",
     "accent": "#0ea5e9",

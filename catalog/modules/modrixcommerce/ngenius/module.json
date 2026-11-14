@@ -3,7 +3,7 @@
     "name": "modrixcommerce/ngenius",
     "display_name": "Network International (N-Genius)",
     "description": "Network International N-Genius Online payment gateway for UAE and the Middle East with hosted payment page, card payments, tokenization, and API refunds.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#004b87",

@@ -1,0 +1,14 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/edit": "pages/admin/edit-LXOCTOir.js",
+        "admin/index": "pages/admin/index-cHn6RHoz.js",
+        "admin/settings": "pages/admin/settings-B2J1hl4G.js"
+    },
+    "slots": {
+        "TieredPricingTable": "slots/TieredPricingTable-ByUWARdj.js"
+    },
+    "css": [
+        "module-style-DP3nVlaY.css"
+    ]
+}

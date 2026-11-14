@@ -1,4 +1,4 @@
-@import '../../../../resources/js/components/storefront/electronics.css';
+/* The store's storefront layout already loads its electronics styles (resources/js/components/storefront/electronics.css). */
 
 .marketplace-index .electronics-home {
     gap: var(--marketplace-home-gap, 20px);

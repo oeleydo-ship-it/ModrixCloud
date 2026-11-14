@@ -3,11 +3,11 @@
     "name": "modrixcommerce/store-pickup",
     "display_name": "Store Pickup & Click & Collect",
     "description": "Allow customers to choose in-store or retail branch pickup instead of home delivery, with branch location management, alternative collector authorization, and order readiness tracking.",
-    "version": "1.1.0",
+    "version": "1.1.2",
     "type": "module",
     "icon": "map-pin",
     "accent": "#0ea5e9",
-    "platform_version": "^1.0.0-rc.3",
+    "platform_version": "^1.0",
     "author": "Modrix team",
     "license": "MIT",
     "autoload": {

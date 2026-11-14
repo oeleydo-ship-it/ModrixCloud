@@ -3,13 +3,17 @@
     "name": "modrixcommerce/marketplace",
     "display_name": "Marketplace Electronics",
     "description": "An unbranded electronics storefront inspired by the supplied reference: Manrope typography, navy and teal navigation, campaign banners, offer tiles, sidebar filtering and a three-column product page.",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^0.4 || ^1.0",
     "author": "Modrix team",
     "license": "MIT",
-    "capabilities": ["home.sections", "custom_fonts", "demo_content"],
+    "capabilities": [
+        "home.sections",
+        "custom_fonts",
+        "demo_content"
+    ],
     "assets": "assets",
     "design": {
         "color.background": "#ffffff",

@@ -1,0 +1,1 @@
+var e=e=>typeof e==`string`||typeof e==`number`?String(e):``;export{e as t};

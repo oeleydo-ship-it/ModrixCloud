@@ -3,7 +3,7 @@
     "name": "modrixcommerce/tempo",
     "display_name": "Tempo Outlet",
     "description": "Responsive Tempo outlet storefront matching the MagicPath reference, with campaigns, catalog filters, product variants, a live cart, checkout, extension slots and full customizer controls.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",

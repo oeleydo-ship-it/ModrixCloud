@@ -3,7 +3,7 @@
     "name": "modrixcommerce/payu",
     "display_name": "PayU Payments",
     "description": "PayU payment gateway for India with Credit/Debit Cards, Net Banking, UPI, EMI, SHA-512 cryptographic verification, and server reconciliation.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#a6c43a",

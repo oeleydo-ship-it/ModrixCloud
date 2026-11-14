@@ -1,0 +1,11 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-E_KNE3Ps.js",
+        "storefront/frame": "pages/storefront/frame-C3vKlRfW.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-D2Kk_k7h.css"
+    ]
+}

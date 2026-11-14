@@ -3,7 +3,7 @@
     "name": "modrixcommerce/wishlist",
     "display_name": "Wishlist & Save For Later",
     "description": "Cross-device customer wishlist, 1-click save for later, guest-to-customer account sync, shareable lists, and admin restock demand analytics.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "heart",
     "accent": "#e11d48",

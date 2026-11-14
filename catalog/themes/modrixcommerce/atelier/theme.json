@@ -3,7 +3,7 @@
     "name": "modrixcommerce/atelier",
     "display_name": "Atelier",
     "description": "Editorial luxury minimalism storefront with balanced typography, split hero, curated product rails, storytelling blocks, category grid, immersive campaign banners and full live section customizer.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",
@@ -15,7 +15,7 @@
         "sections"
     ],
     "assets": "assets",
-    "screenshot": "assets/demo-preview.jpg",
+    "screenshot": "assets/demo-preview.png",
     "fonts": [
         {
             "family": "Jost",
@@ -59,6 +59,5 @@
             "date": "2026-11-09",
             "notes": "Atelier: editorial luxury minimalism storefront with live customizer, split hero, product rails, storytelling blocks, campaign banners, gift edit, and full module slots."
         }
-    ],
-    "screenshot": "assets/demo-preview.png"
+    ]
 }

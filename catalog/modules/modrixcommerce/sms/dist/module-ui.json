@@ -1,0 +1,14 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-DMEhXF1T.js",
+        "storefront/account": "pages/storefront/account-Bgjwle8D.js",
+        "storefront/verify": "pages/storefront/verify-BYeQzChf.js"
+    },
+    "slots": {
+        "RegisterPhone": "slots/RegisterPhone-DJGu3P3f.js"
+    },
+    "css": [
+        "package-style-BMO2BJzA.css"
+    ]
+}

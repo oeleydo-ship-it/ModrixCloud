@@ -1,0 +1,25 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/components.tsx": "src/components-Bu4Ke6KI.js",
+        "src/layout.tsx": "src/layout-IUJt-e2s.js",
+        "src/sections/apps.tsx": "src/sections/apps-BfWkOCmL.js",
+        "src/sections/campaign-banner.tsx": "src/sections/campaign-banner-rG0apopy.js",
+        "src/sections/categories-grid.tsx": "src/sections/categories-grid-B60ym8U1.js",
+        "src/sections/curated-gifts.tsx": "src/sections/curated-gifts-DC-OG_Br.js",
+        "src/sections/editorial.tsx": "src/sections/editorial-CNQrZGRe.js",
+        "src/sections/footer.tsx": "src/sections/footer-NMlrs0fT.js",
+        "src/sections/header.tsx": "src/sections/header-DkaiCfvT.js",
+        "src/sections/hero.tsx": "src/sections/hero-CrY-kJAp.js",
+        "src/sections/main-cart.tsx": "src/sections/main-cart-YWsZ6nz5.js",
+        "src/sections/main-collection.tsx": "src/sections/main-collection-TKcyPyZQ.js",
+        "src/sections/main-page.tsx": "src/sections/main-page-DJrmmX2K.js",
+        "src/sections/main-product.tsx": "src/sections/main-product-E9F1_yHq.js",
+        "src/sections/product-rail.tsx": "src/sections/product-rail-FiF2OjFn.js",
+        "src/sections/story.tsx": "src/sections/story-B9Xin7g_.js"
+    },
+    "css": [
+        "package-style-BSEs1zYa.css",
+        "style-BelhyPV_.css"
+    ]
+}

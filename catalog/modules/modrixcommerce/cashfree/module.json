@@ -3,7 +3,7 @@
     "name": "modrixcommerce/cashfree",
     "display_name": "Cashfree Payments",
     "description": "Cashfree Payments gateway for India with hosted checkout, UPI, cards, net banking, signed webhooks, and instant refunds.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#0c3260",

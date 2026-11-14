@@ -3,7 +3,7 @@
     "name": "modrixcommerce/sable",
     "display_name": "Sable Atelier",
     "description": "Editorial travel theme with reference-proportioned product details, portrait product grids, compact catalog filters and a split collection campaign, all editable in the live section editor.",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",

@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-CwHIw11L.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-JayWpbuj.css"
+    ]
+}

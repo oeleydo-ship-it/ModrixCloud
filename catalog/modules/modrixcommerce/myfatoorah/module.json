@@ -3,7 +3,7 @@
     "name": "modrixcommerce/myfatoorah",
     "display_name": "MyFatoorah Payments",
     "description": "MyFatoorah payment gateway for UAE & GCC supporting Cards, Apple Pay, Google Pay, Mada, KNET, Benefit, and automated server reconciliation.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#0284c7",

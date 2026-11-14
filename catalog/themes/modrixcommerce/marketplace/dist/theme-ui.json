@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/cart.tsx": "src/cart-B0Uh3JCk.js",
+        "src/catalog.tsx": "src/catalog-BT_BBK1M.js",
+        "src/index.tsx": "src/index-D-P27l47.js"
+    },
+    "css": [
+        "package-style-zo3XXrGh.css",
+        "style-B2x6LMmp.css"
+    ]
+}

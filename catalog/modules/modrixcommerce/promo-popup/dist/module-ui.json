@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-Dy0cLdGz.js"
+    },
+    "slots": {
+        "PromoPopup": "slots/PromoPopup-DMyj-dxs.js"
+    },
+    "css": [
+        "module-style-2WgUpmgm.css"
+    ]
+}

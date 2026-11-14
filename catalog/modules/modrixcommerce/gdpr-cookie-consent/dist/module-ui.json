@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-CiCGi2PH.js"
+    },
+    "slots": {
+        "GdprConsent": "slots/GdprConsent-CxgKQaze.js"
+    },
+    "css": [
+        "module-style-POGntKSY.css"
+    ]
+}

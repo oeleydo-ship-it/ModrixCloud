@@ -1,0 +1,10 @@
+{
+    "sdk": 1,
+    "pages": {
+        "settings": "pages/settings-BJMoRVpM.js"
+    },
+    "slots": {},
+    "css": [
+        "module-style-JayWpbuj.css"
+    ]
+}

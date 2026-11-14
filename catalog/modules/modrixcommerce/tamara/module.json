@@ -3,7 +3,7 @@
     "name": "modrixcommerce/tamara",
     "display_name": "Tamara: Buy Now, Pay Later",
     "description": "Let customers across the Gulf split payments with Tamara. Adds Tamara at checkout, promo messaging on product and cart pages, webhooks, capture and refunds.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "wallet",
     "accent": "#a855f7",

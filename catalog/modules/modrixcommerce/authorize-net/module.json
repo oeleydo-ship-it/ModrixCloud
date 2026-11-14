@@ -3,7 +3,7 @@
     "name": "modrixcommerce/authorize-net",
     "display_name": "Authorize.Net",
     "description": "Accept cards on Authorize.Net's hosted payment form. The customer pays at Authorize.Net, and this store marks the order paid only after Authorize.Net confirms the transaction.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#1a4f8b",

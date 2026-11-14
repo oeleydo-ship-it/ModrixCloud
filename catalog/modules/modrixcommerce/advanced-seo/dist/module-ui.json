@@ -1,0 +1,12 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-B2nyKg9o.js"
+    },
+    "slots": {
+        "SeoTags": "slots/SeoTags-ma6_jJWa.js"
+    },
+    "css": [
+        "module-style-dz1Ce2yx.css"
+    ]
+}

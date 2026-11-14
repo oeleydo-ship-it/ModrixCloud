@@ -38,8 +38,8 @@ class StorePickupServiceProvider extends ServiceProvider
 
         // 2. Register storefront middleware to dynamically adapt COD to "Pay in store" or hide it
         $router->pushMiddlewareToGroup('web', StorePickupCheckoutMiddleware::class);
-        if ($this->app->bound(\Illuminate\Contracts\Http\Kernel::class)) {
-            $kernel = $this->app->make(\Illuminate\Contracts\Http\Kernel::class);
+        if ($this->app->bound(Kernel::class)) {
+            $kernel = $this->app->make(Kernel::class);
             if (method_exists($kernel, 'pushMiddleware')) {
                 $kernel->pushMiddleware(StorePickupCheckoutMiddleware::class);
             }
@@ -61,12 +61,8 @@ class StorePickupServiceProvider extends ServiceProvider
             'store_pickup_picker',
             'Store & Branch Pickup Selector',
             'StorePickupPicker',
-            [
-                'checkout.after_shipping',
-                'checkout.before_place_order',
-                'checkout.after_summary',
-            ],
-            'checkout.after_shipping',
+            $places = self::checkoutPlaces(),
+            $places[0],
             function () {
                 /** @var StorePickupSettings $settings */
                 $settings = $this->app->make(StorePickupSettings::class);
@@ -150,5 +146,20 @@ class StorePickupServiceProvider extends ServiceProvider
             'payment_method_code' => $order->payment_method_code,
             'payment_status' => $order->payment_status->value,
         ];
+    }
+
+    /**
+     * Checkout places this core can hold, best first. "Under the shipping
+     * methods" (checkout.after_shipping) needs a newer core; on an older one
+     * the widget falls back to "Above Place order" instead of failing to boot.
+     *
+     * @return non-empty-list<string>
+     */
+    private static function checkoutPlaces(): array
+    {
+        return array_values(array_filter(
+            ['checkout.after_shipping', 'checkout.before_place_order', 'checkout.after_summary'],
+            fn (string $place): bool => array_key_exists($place, StorefrontSlots::PLACES),
+        ));
     }
 }

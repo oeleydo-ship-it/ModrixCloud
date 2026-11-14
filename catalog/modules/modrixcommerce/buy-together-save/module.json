@@ -3,7 +3,7 @@
     "name": "modrixcommerce/buy-together-save",
     "display_name": "Buy Together & Save",
     "description": "Increase average order value with customizable 'Buy Together & Save' product bundle offers, combo discounts, smart companion suggestions, and 1-click cart addition with instant savings.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "sparkles",
     "accent": "#059669",

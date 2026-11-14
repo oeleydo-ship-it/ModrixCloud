@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/form": "pages/admin/form-BF1BcT-k.js",
+        "admin/index": "pages/admin/index-BcXdOhUf.js"
+    },
+    "slots": {
+        "ProductAddons": "slots/ProductAddons-CcmBYSqY.js"
+    },
+    "css": [
+        "module-style-aYke4aTI.css"
+    ]
+}

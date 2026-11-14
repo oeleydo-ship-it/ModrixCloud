@@ -3,7 +3,7 @@
     "name": "modrixcommerce/ziina",
     "display_name": "Ziina Payment Gateway",
     "description": "Ziina payment gateway for the UAE with Apple Pay, Google Pay, cards, fast checkout, and Central Bank of the UAE regulatory compliance.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#6236ff",

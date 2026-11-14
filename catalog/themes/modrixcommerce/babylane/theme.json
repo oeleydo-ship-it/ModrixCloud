@@ -3,7 +3,7 @@
     "name": "modrixcommerce/babylane",
     "display_name": "Baby Lane",
     "description": "Baby-store theme matching the reference layout: blue scalloped header, yellow promotion strip, editable campaign mosaic, trending categories, department product panels, detailed shop filters and a complete customer storefront. All pages use the current live section customizer.",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "type": "theme",
     "theme_type": "storefront",
     "platform_version": "^1.0",

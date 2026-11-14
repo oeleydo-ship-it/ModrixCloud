@@ -1,0 +1,18 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/catalog.tsx": "src/catalog-DvGTUXCM.js",
+        "src/compare.tsx": "src/compare-BSx-J5HQ.js",
+        "src/components.tsx": "src/components-BDoGmJgR.js",
+        "src/countdown.tsx": "src/countdown-CaZ6HSt3.js",
+        "src/customizer.tsx": "src/customizer-DUxWo373.js",
+        "src/footer.tsx": "src/footer-BdXzJWC-.js",
+        "src/header.tsx": "src/header-CNKCWK_9.js",
+        "src/index.tsx": "src/index-B2aHjZzg.js",
+        "src/layout.tsx": "src/layout-DeZ1j8DL.js",
+        "src/product.tsx": "src/product-BjOXwbZ5.js"
+    },
+    "css": [
+        "package-style-45txoVZU.css"
+    ]
+}

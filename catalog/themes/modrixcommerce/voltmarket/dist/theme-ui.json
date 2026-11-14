@@ -1,0 +1,26 @@
+{
+    "sdk": 1,
+    "entries": {
+        "src/components.tsx": "src/components-HNNnA6HK.js",
+        "src/layout.tsx": "src/layout-DToF1MBo.js",
+        "src/mobile-navigation.tsx": "src/mobile-navigation-Bxw6hkhu.js",
+        "src/sections/apps.tsx": "src/sections/apps-CtIBKAQc.js",
+        "src/sections/benefits.tsx": "src/sections/benefits-CxDQFzZK.js",
+        "src/sections/category-grid.tsx": "src/sections/category-grid-BfUGgQmg.js",
+        "src/sections/footer.tsx": "src/sections/footer-QdZ8pGmj.js",
+        "src/sections/header.tsx": "src/sections/header-DN6zFwNA.js",
+        "src/sections/hero.tsx": "src/sections/hero-Bn4OrzOr.js",
+        "src/sections/main-cart.tsx": "src/sections/main-cart-h-yKaf4w.js",
+        "src/sections/main-collection.tsx": "src/sections/main-collection-B4eexaLB.js",
+        "src/sections/main-page.tsx": "src/sections/main-page-DUgBOIz8.js",
+        "src/sections/main-product.tsx": "src/sections/main-product-WAY8ahme.js",
+        "src/sections/newsletter.tsx": "src/sections/newsletter-BBXSdd5o.js",
+        "src/sections/product-shelf.tsx": "src/sections/product-shelf-De3YPrD4.js",
+        "src/sections/promotions.tsx": "src/sections/promotions-DYJxad_W.js",
+        "src/sections/rich-text.tsx": "src/sections/rich-text-Dmss2tjv.js",
+        "src/sections/testimonials.tsx": "src/sections/testimonials-3bnDF46Q.js"
+    },
+    "css": [
+        "package-style-C2f3W22y.css"
+    ]
+}

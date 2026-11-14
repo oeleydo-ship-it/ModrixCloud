@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-C8OgCij2.js"
+    },
+    "slots": {
+        "SocialProofProductBadge": "slots/SocialProofProductBadge-qNTY1wtn.js",
+        "SocialProofToast": "slots/SocialProofToast-CMPTEFNi.js"
+    },
+    "css": [
+        "module-style-DT7yiG_s.css"
+    ]
+}

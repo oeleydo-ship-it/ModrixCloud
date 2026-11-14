@@ -3,7 +3,7 @@
     "name": "modrixcommerce/cart-abandonment-recovery",
     "display_name": "Cart Abandonment Recovery",
     "description": "Recovers lost revenue with automated email sequences, exit-intent modals, one-click cart restoration, coupon incentives, and conversion analytics.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "shopping-cart",
     "accent": "#f59e0b",

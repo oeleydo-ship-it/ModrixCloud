@@ -1,0 +1,13 @@
+{
+    "sdk": 1,
+    "pages": {
+        "admin/index": "pages/admin/index-DL1EsgtK.js"
+    },
+    "slots": {
+        "ExitIntentModal": "slots/ExitIntentModal-CvKUnucr.js",
+        "SaveCartWidget": "slots/SaveCartWidget-BuHEPU61.js"
+    },
+    "css": [
+        "module-style-DTLNnOco.css"
+    ]
+}

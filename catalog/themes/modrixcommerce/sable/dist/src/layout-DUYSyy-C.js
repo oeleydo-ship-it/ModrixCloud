@@ -1,0 +1,1 @@
+const{jsx:e}=await __modrix.load(`react/jsx-runtime`),{useStoreTheme:t}=await __modrix.load(`@/hooks/use-store-theme`);function n({DefaultLayout:n,children:r}){let{theme:i}=t();return e(`div`,{className:`sa-shell`,style:{"--sa-panel":String(i?.settings?.image_background??`#f3f2ef`)},children:e(n,{children:r})})}export{n as default};

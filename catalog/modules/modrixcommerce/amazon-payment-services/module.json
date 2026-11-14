@@ -3,7 +3,7 @@
     "name": "modrixcommerce/amazon-payment-services",
     "display_name": "Amazon Payment Services",
     "description": "Amazon Payment Services (formerly PayFort) gateway with hosted checkout, SHA signature verification, payment status inquiry, and API refunds for UAE and MENA.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#ff9900",

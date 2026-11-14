@@ -3,7 +3,7 @@
     "name": "modrixcommerce/fraud-detection",
     "display_name": "Fraud Detection",
     "description": "Real-time fraud risk analysis engine that scores every order, detects suspicious patterns, manages blacklists, and provides merchant review workflows with comprehensive reporting dashboards.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "module",
     "icon": "shield-alert",
     "accent": "#ef4444",

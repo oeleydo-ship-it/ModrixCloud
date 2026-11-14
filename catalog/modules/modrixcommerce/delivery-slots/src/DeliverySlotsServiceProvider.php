@@ -38,12 +38,8 @@ class DeliverySlotsServiceProvider extends ServiceProvider
             'delivery_slot_picker',
             'Delivery Slot Picker',
             'DeliverySlotPicker',
-            [
-                'checkout.after_shipping',
-                'checkout.before_place_order',
-                'checkout.after_summary',
-            ],
-            'checkout.after_shipping',
+            $places = self::checkoutPlaces(),
+            $places[0],
             function () {
                 /** @var DeliverySlotsSettings $settings */
                 $settings = $this->app->make(DeliverySlotsSettings::class);
@@ -156,5 +152,20 @@ class DeliverySlotsServiceProvider extends ServiceProvider
             'slot_window' => $slotWindow,
             'instructions' => $schedule->delivery_instructions,
         ];
+    }
+
+    /**
+     * Checkout places this core can hold, best first. "Under the shipping
+     * methods" (checkout.after_shipping) needs a newer core; on an older one
+     * the widget falls back to "Above Place order" instead of failing to boot.
+     *
+     * @return non-empty-list<string>
+     */
+    private static function checkoutPlaces(): array
+    {
+        return array_values(array_filter(
+            ['checkout.after_shipping', 'checkout.before_place_order', 'checkout.after_summary'],
+            fn (string $place): bool => array_key_exists($place, StorefrontSlots::PLACES),
+        ));
     }
 }

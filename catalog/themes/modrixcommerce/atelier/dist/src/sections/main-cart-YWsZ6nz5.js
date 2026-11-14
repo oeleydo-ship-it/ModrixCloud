@@ -1,0 +1,1 @@
+/* empty css                         */const{jsx:e}=await __modrix.load(`react/jsx-runtime`),{PlatformCartPage:t}=await __modrix.load(`@/pages/storefront/cart`);function n({section:n,page:r}){return n.settings,r?e(`section`,{className:`at-frame at-section`,children:e(t,{...r})}):null}export{n as default};

@@ -3,7 +3,7 @@
     "name": "modrixcommerce/social-proof-notifications",
     "display_name": "Social Proof Notifications",
     "description": "Boost sales and customer trust with real-time purchase toasts, live visitor viewer counts, low-stock urgency badges, and engagement analytics.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "bell",
     "accent": "#6366f1",

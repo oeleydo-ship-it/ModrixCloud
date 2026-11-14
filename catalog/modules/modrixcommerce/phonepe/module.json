@@ -3,7 +3,7 @@
     "name": "modrixcommerce/phonepe",
     "display_name": "PhonePe Payment Gateway",
     "description": "PhonePe payment gateway for India supporting UPI (Intent, QR, Collect), Net Banking, Cards, and Wallets with secure hosted checkout and X-VERIFY checksum authentication.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "icon": "credit-card",
     "accent": "#5f259f",
